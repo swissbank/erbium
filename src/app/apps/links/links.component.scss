@@ -1,0 +1,225 @@
+.mat-tab-group {
+    margin: 60px;
+}
+
+.md-tab-group .mat-tab-body[_ngcontent-c6] {
+    overflow: hidden !important;
+}
+
+.mat-radio-button {
+    padding: 4px 8px 2px 8px;
+    border-radius: 5px;
+    -moz-border-radius: 40px;
+    -webkit-border-radius: 40px;
+    border-radius: 40px;
+    margin: 0px 3px;
+    background: none;
+    font-size: 15px;
+    /deep/.mat-radio-label {
+        align-items: normal;
+    }
+}
+
+.green {
+    border: 2px solid green;
+    
+    /deep/.mat-radio-outer-circle {
+        border-color: green;
+    }
+    /deep/.mat-radio-inner-circle {
+        background-color: darkgreen;
+    }
+}
+
+.red {
+    border: 2px solid #e74c3c;
+    /deep/.mat-radio-outer-circle {
+        border-color: darkred;
+    }
+    /deep/.mat-radio-inner-circle {
+        background-color: maroon;
+    }
+}
+.grey {
+    border: 2px solid grey;
+    /deep/.mat-radio-outer-circle {
+        border-color: darkgrey;
+    }
+    /deep/.mat-radio-inner-circle {
+        background-color: darkslategray;
+    }
+}
+
+.ngx-datatable.material .datatable-header .datatable-header-cell {
+    text-align: center;
+}
+.button-row {
+    margin-top: 40px;
+    text-align: center;
+    padding: 10px;
+}
+
+.button-row button {
+    width: 180px;
+    height: 40px;
+    font-size: 22px;
+    border: 1px solid black;
+    margin-left: 20px;
+}
+
+.fileUpload {
+    display: inline-block;
+    position: relative;
+    width: 137px;
+    height: 45px;
+    line-height: 45px;
+    border-radius: 7px;
+    font-size: 1.0em;
+    background-color: #3C9;
+    // color: #646464;
+    color:#FFF;
+    cursor: pointer;
+    
+}
+
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+.zuruck{
+    background: #ecf0f1;
+}
+.weiter{
+    background: #3498db;
+}
+.row {
+    margin-top: 20px;
+    text-align: center;
+}
+table, th, td {
+   border: 1px solid black;
+}
+
+ md-card{
+    margin-top:2% !important;
+ }
+
+ .margin2Top {
+    margin-top:2% !important;
+ }
+ .margin2Bottem{
+    margin-bottom:2% !important;
+ };
+
+.mat-tab-body[_ngcontent-c6]{
+    overflow: hidden !important;
+}
+#md-tab-content-1-0{
+    overflow: hidden !important;
+}
+
+md-tab-group {
+    /deep/ .mat-tab-body {
+      height: 100%;
+      overflow: hidden !important;
+    }
+  }
+  
+  .ngx-datatable.material {
+  .datatable-header {
+    .datatable-header-cell {
+       /deep/ .datatable-header-cell-label{
+         font-weight: bold !important;
+      }
+    }
+  }
+}
+.datatable-header-cell-wrapper span.datatable-header-cell-label.draggable{
+     font-weight: bold !important;
+}
+.datatable-header-cell-label{
+     font-weight: bold !important;
+}
+.btn-previous{
+    background-color: #bdc3c7;
+    color: #fff;
+    margin-left: 6px;
+    // margin-top: 400px;
+    height: 30px;
+}
+.btn-next{
+    background-color: #3498db;
+    color: #fff;
+}
+.textSpacing{
+    padding: 10px;
+    border: 1px solid;
+    word-spacing: 3px;
+}
+.tdStyle{
+    padding: 10px;
+    word-spacing: 3px;
+   // box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    margin-left: 37px !important;
+}
+#tabsGroups {
+    /deep/
+    .ngx-datatable.material .datatable-footer{
+        display: none !important;
+}
+}
+/deep/ .next-btn-last{
+    margin-left: 27% !important;
+    margin-right:10px !important;
+}
+
+.height50 {
+    height:50px !important;
+    margin-top: 35px !important;
+
+}
+
+.capitalizeLetters {
+     text-transform: uppercase;
+}
+
+.deleteButton {
+    position: absolute;
+    width: 200px;
+    color: white;
+    display: inline-block;
+    background-color: red;
+    border-radius: 5px;
+}
+
+.serialNumber{
+    width: 80px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.questions{
+    font-weight: bold;
+    padding-left: 2%
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}

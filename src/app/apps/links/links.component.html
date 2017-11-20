@@ -1,0 +1,732 @@
+ <div *ngIf="!opentabs" style="height: 40px; margin-top: 15px">
+         <md-input-container class="ml-xs mr-xs" style="margin-left: 10% !important;padding-left:10% !important;width: 50%;">
+              <input mdInput 
+                  type="text"
+                  style="padding:2px;width:30%;"
+                  placeholder='Suche nach Primary Shipment-ID'
+                  (keyup)='updateFilter($event)' />
+            </md-input-container>
+   </div>     
+<ngx-datatable style="margin-top: 3%" ngx-resize-watcher class="material" *ngIf="!opentabs" [rows]="customData.rows" [columnMode]="'force'"
+  [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="customData.count" [offset]="customData.offset"
+  [limit]="customData.limit" (page)='onPage($event)'>
+  <ngx-datatable-column name="Primary S-ID" prop="Primary SID">
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+      <div *ngIf="row.shipment && row.shipment[0]">
+        {{row.shipment[0].shipment_id}}
+      </div>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="Fahrer" prop="fahrer"></ngx-datatable-column>
+  <ngx-datatable-column name="ADR" prop="adr"></ngx-datatable-column>
+  <ngx-datatable-column name="Luftfracht" prop="luftfracht"></ngx-datatable-column>
+  <ngx-datatable-column name="Zuweisung Rampe" prop="rampe"></ngx-datatable-column>
+  <ngx-datatable-column name="Prozess">
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+      <div *ngIf="!row['forklift'] || row['forklift'] == null">
+        Bereit
+      </div>
+      <div *ngIf="row['forklift']" >
+        <div *ngIf="row['forklift']['prozess']">
+            {{row['forklift']['prozess']}} von 5
+        </div>
+        <div *ngIf="row['forklift']['prozess'] == 0">
+            Bereit
+        </div>
+      </div>
+    </ng-template>
+  </ngx-datatable-column>
+  <ngx-datatable-column name="Prüfung" *ngIf="user.user.type != 2 && user.user.type !=1">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+             <div *ngIf="row['forklift']">
+                  <div *ngIf="row['forklift']['prozess'] == 5">
+                             <button md-raised-button md-raised-button color="warning">Beendet</button>
+                  </div>
+                  <div *ngIf="row['forklift']['prozess'] != 5">
+                          <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
+                                (click)="sendData(row)">Bearbeiten</button>
+                          <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, openTabs)">Starten</button>
+                          <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
+                  </div>  
+             </div>
+             <div *ngIf="!row['forklift']">
+                    <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
+                      (click)="sendData(row)">Bearbeiten</button>
+                    <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, openTabs)">Starten</button>
+                    <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
+        
+             </div>
+          </ng-template> 
+  </ngx-datatable-column>
+  <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+                <button md-raised-button  color="primary" (click)="open(row)">Bericht senden </button>
+            </ng-template>
+  </ngx-datatable-column>
+</ngx-datatable>
+<div *ngIf="opentabs&& currentTransport.shipment && currentTransport.destination" style="margin-top: 3% ;margin-left:7%">
+    <div *ngIf="currentTransport.shipment &&currentTransport.destination">
+        <div *ngIf="currentTransport.shipment.length <=0" class="capitalizeLetters">
+            <b style="font-size: 15px"> <span> CHEMIKALIENTRANSPORT </span> 0 VON {{currentTransport.fahrzeughalter}} / {{currentTransport.fahrer}} NACH {{currentTransport.destination}} </b>
+        </div>
+        <div  *ngIf="currentTransport.shipment.length >0"  class="capitalizeLetters">
+            <b style="font-size: 15px"><span> CHEMIKALIENTRANSPORT </span> {{currentTransport.shipment[0]['shipment_id']}} VON {{currentTransport.fahrzeughalter}} / {{currentTransport.fahrer}} NACH {{currentTransport.destination}} </b>
+        </div> 
+    </div>
+    <div>
+    </div>
+</div>
+<md-tab-group *ngIf="opentabs" style="margin-top: 3%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups">
+  <md-tab label="1. Dokumente" [disabled]="tab1" class="tableWrapper" >
+    <!--<table>
+      <tr>
+        <th>Nr.</th>
+        <th>Dokumentenkontrolle</th>
+        <th>Prüfen</th>
+      </tr>
+      <tr *ngFor="let row of documentsQuestions.rows">
+        <td class="serialNumber">{{row.sr}}</td>
+        <td class="questions">{{row.question}}
+            <div *ngIf="row.question2 && adr" style="display:inline-block">
+              {{row.question2}}
+            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+              <input mdInput placeholder="Ausweis Nr.:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_answeis_nr">
+            </md-input-container>
+          </div>
+          <div *ngIf="row.question3 && adr" style="display:inline-block">
+            {{row.question2}}
+            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+              <input mdInput placeholder="Gültig bis:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_gultig_bis">
+            </md-input-container>
+          </div>
+        </td>
+        <td>
+          <md-select  *ngIf="row.sr==1.1"  placeholder="Zuweisung" class="ml-xs mr-xs" [(ngModel)]="updateRamp" (change)="OnchangeRamp()">
+                 <md-option *ngFor="let i of list" [value]="i.id" >{{i.name}}</md-option>
+                </md-select>
+                <md-select  *ngIf="row.sr==1.2 && adr"  placeholder="Prüfen" class="ml-xs mr-xs"  [(ngModel)]="fahrzeugausweis_21">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.3 && adr" [(ngModel)]="adr_schulungsbescheinigung_22"  class="ml-xs mr-xs"    placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.4  && adr" [(ngModel)]="lichtbildausweis_23"   class="ml-xs mr-xs"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.5" [(ngModel)]="arbeitsbescheinigung_fahrer_24"  class="ml-xs mr-xs"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+                <md-select *ngIf="row.sr==1.6 && adr" [(ngModel)]="vertrauensabfertigung_25"  class="ml-xs mr-xs"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr==1.7 && adr" [(ngModel)]="orangefarbene_warntafeln_26"  class="ml-xs mr-xs"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr== 1.8 && adr" [(ngModel)]="schriftliche_weisungen_27"  class="ml-xs mr-xs"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+        </td>
+      </tr>
+    </table>-->
+    <!--<div *ngFor="let row of documentsQuestions.rows" class="material  margin2Top row" style="border: 1px solid black">
+      <div class="col">{{row.sr}}</div>
+      <div class="col">
+          {{row.question}}
+      </div>
+      <div class="col">
+      <md-select  *ngIf="row.sr==1.1"  placeholder="Zuweisung" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="updateRamp" (change)="OnchangeRamp()">
+                 <md-option *ngFor="let i of list" [value]="i.id" >{{i.name}}</md-option>
+                </md-select>
+                <md-select  *ngIf="row.sr==1.2 && adr"  placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="fahrzeugausweis_21">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.3 && adr" [(ngModel)]="adr_schulungsbescheinigung_22"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.4  && adr" [(ngModel)]="lichtbildausweis_23"   class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.5" [(ngModel)]="arbeitsbescheinigung_fahrer_24"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+                <md-select *ngIf="row.sr==1.6 && adr" [(ngModel)]="vertrauensabfertigung_25"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr==1.7 && adr" [(ngModel)]="orangefarbene_warntafeln_26"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr== 1.8 && adr" [(ngModel)]="schriftliche_weisungen_27"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+      </div>
+    </div>-->
+    <ngx-datatable ngx-resize-watcher  #firstTable class="material  margin2Top" [rows]="documentsQuestions.rows" [columnMode]="'force'" [headerHeight]="50" [footerHeight]="50"
+      [rowHeight]="'auto'" [externalPaging]="true" [count]="documentsQuestions.count" [offset]="documentsQuestions.offset"
+      [limit]="documentsQuestions.limit" (page)='onPage($event)'>
+      <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
+      <ngx-datatable-column name="Dokumentenkontrolle" prop="question">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+          <div style="width:100%">
+            <div style="width: 65%;display: inline-block;"> {{row.question}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen 
+              </ng-template>
+               <md-select  *ngIf="row.sr==1.1"  placeholder="Zuweisung" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="updateRamp" (change)="OnchangeRamp()">
+                 <md-option *ngFor="let i of list" [value]="i.id" >{{i.name}}</md-option>
+                </md-select>
+                <md-select  *ngIf="row.sr==1.2 && adr"  placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="fahrzeugausweis_21">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.3 && adr" [(ngModel)]="adr_schulungsbescheinigung_22"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.4  && adr" [(ngModel)]="lichtbildausweis_23"   class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              <md-select *ngIf="row.sr==1.5" [(ngModel)]="arbeitsbescheinigung_fahrer_24"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+                <md-select *ngIf="row.sr==1.6 && adr" [(ngModel)]="vertrauensabfertigung_25"  class="ml-xs mr-xs" style="width:30%;"   placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr==1.7 && adr" [(ngModel)]="orangefarbene_warntafeln_26"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select *ngIf="row.sr== 1.8 && adr" [(ngModel)]="schriftliche_weisungen_27"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div *ngIf="row.question2 && adr" style="display:inline-block">
+            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+              <input mdInput placeholder="Ausweis Nr.:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_answeis_nr">
+            </md-input-container>
+          </div>
+          <div *ngIf="row.question3 && adr" style="display:inline-block">
+            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+              <input mdInput placeholder="Gültig bis:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_gultig_bis">
+            </md-input-container>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+    <div class="row height50">
+           <button md-raised-button md-raised-button color="warning" (click)="closeTabs()">Zurück</button>
+           <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(1)">Weiter</button>
+    </div>
+  </md-tab>
+
+  <md-tab label="2. Zustand" [disabled]="tab2" *ngIf="adr">
+      <!--<table>
+      <tr>
+        <th>Nr.</th>
+        <th>Dokumentenkontrolle</th>
+        <th>Prüfen</th>
+      </tr>
+      <tr *ngFor="let row of stateControl.rows">
+        <td class="serialNumber">{{row.sr}}</td>
+        <td class="questions">{{row.question}}
+          <div *ngIf="row.question2">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question2}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                 <md-select  [(ngModel)]="ladungssicherungsmittel_34_gurte" class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question3">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question3}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                
+                 <md-select [(ngModel)]="ladungssicherungsmittel_34_spannstangen"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question4">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question4}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                
+                  <md-select [(ngModel)]="ladungssicherungsmittel_34_antirutschmatten"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question5" style="width:100%;margin-top:1%">
+            <div style="width:100%">
+              <div style="width: 65%;display: inline-block;">{{row.question5}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                <md-select [(ngModel)]="ladungssicherungsmittel_34_leerpaletten"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+           <md-select *ngIf="row.sr==2.1" [(ngModel)]="bewegungssicherung_31"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              
+              <md-select  *ngIf="row.sr==2.2" [(ngModel)]="visuelle_ueberpruefung_32"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+                <md-select  *ngIf="row.sr==2.3" [(ngModel)]="ladungsbruecke_besenrein_33"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select  *ngIf="row.sr==2.4" [(ngModel)]="ladungssicherungsmittel_34"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+        </td>
+      </tr>
+    </table>-->
+    
+    
+    <ngx-datatable ngx-resize-watcher #secondTable class="material margin2Top" [rows]="stateControl.rows" [columnMode]="'force'" [headerHeight]="50" [footerHeight]="50"
+      [rowHeight]="'auto'" [externalPaging]="true" [count]="stateControl.count" [offset]="stateControl.offset" [limit]="stateControl.limit"
+      (page)='onPage($event)'>
+      <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
+      <ngx-datatable-column name="Conditions" prop="question">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+          <div style="width:100%">
+            <div style="width: 65%;display: inline-block;">{{row.question}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+               <md-select *ngIf="row.sr==2.1" [(ngModel)]="bewegungssicherung_31"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              
+              <md-select  *ngIf="row.sr==2.2" [(ngModel)]="visuelle_ueberpruefung_32"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+                <md-select  *ngIf="row.sr==2.3" [(ngModel)]="ladungsbruecke_besenrein_33"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+               <md-select  *ngIf="row.sr==2.4" [(ngModel)]="ladungssicherungsmittel_34"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div *ngIf="row.question2">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question2}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                 <md-select  [(ngModel)]="ladungssicherungsmittel_34_gurte" class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question3">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question3}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                
+                 <md-select [(ngModel)]="ladungssicherungsmittel_34_spannstangen"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question4">
+            <div style="width:100%;margin-top:1%">
+              <div style="width: 65%;display: inline-block;">{{row.question4}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                
+                  <md-select [(ngModel)]="ladungssicherungsmittel_34_antirutschmatten"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="row.question5" style="width:100%;margin-top:1%">
+            <div style="width:100%">
+              <div style="width: 65%;display: inline-block;">{{row.question5}}</div>
+              <div style="width: 34%;display: inline-block;text-align: right;">
+                <md-select [(ngModel)]="ladungssicherungsmittel_34_leerpaletten"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+    <div class="row height50 ">
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(2)">Weiter</button>
+    </div>
+  </md-tab>
+  <md-tab label="3. ADR" [disabled]="tab3">
+    <ngx-datatable class="material  margin2Top" ngx-resize-watcher [rows]="controlOfTransportUnit.rows" [columnMode]="'force'" [headerHeight]="50"
+      [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="controlOfTransportUnit.count" [offset]="controlOfTransportUnit.offset"
+      [limit]="controlOfTransportUnit.limit" (page)='onPage($event)'>
+      <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
+      <ngx-datatable-column name="Conditions" prop="question">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+          <div style="width:100%">
+            <div style="width: 65%;display: inline-block;">{{row.question}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+                <md-select *ngIf="row.sr == 4.1" [(ngModel)]="werbefrei_fuer_tierfutter_41"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+
+                <md-select *ngIf="row.sr == 4.2" [(ngModel)]="lebensmittel_futtermittel_42"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div *ngIf="row.question2">
+            {{row.question2}}
+            <md-input-container class="ml-xs mr-xs" style="width:300px;">
+              <input mdInput placeholder="Plombennummer:" type="text" [(ngModel)]="persoenliche_schutzausruestung_43_plomben_nr">
+            </md-input-container>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question3  && adr">
+            <div style="width: 65%;display: inline-block;">{{row.question3}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+           
+               <md-select  [(ngModel)]="persoenliche_schutzausruestung_43"  *ngIf="adr"    class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question4  && adr">
+            <div style="width: 65%;display: inline-block;">{{row.question4}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+               <md-select  [(ngModel)]="persoenliche_schutzausruestung_43_schutzbrille"  prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question5  && adr">
+            <div style="width: 65%;display: inline-block;">{{row.question5}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+               <md-select  [(ngModel)]="persoenliche_schutzausruestung_43_chem_handschuhe"  prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question6  && adr" >
+            <div style="width: 65%;display: inline-block;">{{row.question6}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_warnweste" prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question7  && adr">
+            <div style="width: 65%;display: inline-block;">{{row.question7}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_vollschutzmaske" prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+           
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question8  && adr">
+            <div style="width: 65%;display: inline-block;">{{row.question8}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+               <md-select  [(ngModel)]="persoenliche_schutzausruestung_43_augenspuelflasche" prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+    <div class="row height50">
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(3)">Weiter</button>
+    </div>
+  </md-tab>
+
+ <md-tab label="4. Verpackung" [disabled]="tab4" *ngIf="adr">
+    <ngx-datatable class="material" ngx-resize-watcher [rows]="protectionOfPublic.rows" [columnMode]="'force'" [headerHeight]="50" [footerHeight]="50"
+      [rowHeight]="'auto'" [externalPaging]="true" [count]="protectionOfPublic.count" [offset]="protectionOfPublic.offset"
+      [limit]="protectionOfPublic.limit" (page)='onPage($event)'>
+          <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
+        <ngx-datatable-column name="Packaging" prop="question">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+          <div style="width:100%">
+            <div style="width: 65%;display: inline-block;">{{row.question}}   
+            <md-input-container class="ml-xs mr-xs" style="width: 50%;display:inline-block">
+              <input mdInput placeholder="Ausweis Nr.:" type="text" [(ngModel)]="pulverloescher_plombiert_441">
+            </md-input-container></div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+                <md-select [(ngModel)]="pulverloescher_plombiert_441_pruefung" prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                  <md-option value="1">Ja</md-option>
+                  <md-option value="2">Nein</md-option>
+                  <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div *ngIf="row.question2" style="width:100%">
+             <div style="width: 65%;display: inline-block;">{{row.question2}}</div>
+             <div style="width: 34%;display: inline-block;text-align: right;">
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question3">
+            <div style="width: 65%;display: inline-block;">{{row.question3}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+           
+               <md-select  [(ngModel)]="unterkeil_schaufel_442"  prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+              
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question4">
+            <div style="width: 65%;display: inline-block;">{{row.question4}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+               <md-select  [(ngModel)]="warnzeichen_warndreiecke_443"  prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question5">
+            <div style="width: 65%;display: inline-block;">{{row.question5}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+               <md-select  [(ngModel)]="auffangbehaelter_444"  prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+          <div style="width:100%;margin-top:1%" *ngIf="row.question6">
+            <div style="width: 65%;display: inline-block;">{{row.question6}}</div>
+            <div style="width: 34%;display: inline-block;text-align: right;">
+              <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
+                Prüfen
+              </ng-template>
+             
+              <md-select [(ngModel)]="kanalisationsabdeckung_445" prop="ngModel"  class="ml-xs mr-xs" style="width:30%;"  placeholder="Prüfen">
+                <md-option value="1">Ja</md-option>
+                <md-option value="2">Nein</md-option>
+                <md-option value="3">N.A</md-option>
+                </md-select>
+            </div>
+          </div>
+       </ng-template>
+      </ngx-datatable-column>
+   
+   
+   </ngx-datatable>
+      <md-card>
+      <md-card-title><b>Bilder hinzufügen</b></md-card-title>
+        <md-card-content>
+          <div class="row" style="margin-bottom: 5%;">
+      <div class="fileUpload" style="text-align: center">
+        <span>Bild hinzufügen</span>
+        <input type="file" class="upload" (change)="changeListener($event)" />
+      </div>
+      <div class="fileUpload" style="text-align: center" >
+        <span>Bild hinzufügen</span>
+        <input type="file" class="upload" (change)="changeListener($event)" />
+      </div>
+      <div class="fileUpload" style="text-align: center">
+        <span>Bild hinzufügen</span>
+        <input type="file" class="upload" (change)="changeListener($event)" />
+      </div>
+    </div>
+    <div layout="row" layout-margin >
+      <div *ngFor="let image of images; let i = index" [attr.data-index]="i" style="display:inline-block;padding-left:10%">
+        <img src="https://erbium.ch/backend/{{image.image}}" style="border-radius:5px;max-width:200px;max-height:200px;min-width:200px;min-height:200px;" alt="image caption"/>
+         <button md-raised-button  class="deleteButton" (click)="deleteImage(image ,i)">Lösche Bild</button>   
+      </div>
+    </div>
+
+    </md-card-content>
+    </md-card>
+      <div class="row height50">
+         <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(4)">Weiter</button>
+    </div>
+  </md-tab>
+
+
+
+  <md-tab label="5. Bestätigung" [disabled]="tab5">
+    <md-card style="height:100%;">
+      <md-card-title><b>Bestätigung</b></md-card-title>
+      <md-card-content style="height:100%;">
+        <table>
+          <tr>
+            <td></td>
+            <td class="tdStyle">
+              <p>
+                Der Fahrer bestätigt mit seiner Unterschrift, dass er in Besitz der vollständigen ADR Ausrüstung und des Beförderungsdokumentes
+                war, als er den Ladungsstandort verlassen hat. Er hat auch Kenntnis davon genommen, dass es sich um einen
+                Transport gefährlicher Güter gemäss den Vorschriften des ADR handelt.
+              </p>
+            </td>
+            <td></td>
+            <td></td>
+            <td class="tdStyle">
+              <p>
+                The driver certifies by his signature that he was in possession of all ADR required equipment and transport document when
+                he left the site/warehouse. The driver confirms with his signature to take notice that the transport in question
+                is subject to ADR regulations and that the loading contains dangerous goods.
+              </p>
+            </td>
+          </tr>
+        </table>
+         <button md-raised-button md-raised-button color="warning" class="position-bottom next-btn-last" (click)="changeTab('back')">Zurück</button>
+        <div style="margin-top: 5%; display: inline-block;margin-bottom: 10px">
+          <signature-pad (onSave)="onSaveHandler($event)" (onClear)="onClearHandler()" [width]="width" [height]="height" [hideFooter]="noFooter"
+            [label]="label">
+          </signature-pad>
+          <div style="display:inline-block; text-align:right;margin-left: 26%; margin-top: 8%;"> <b>{{currentDate}}</b></div>
+          <button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button>
+        </div>
+         
+      </md-card-content>
+      
+    </md-card>
+   
+  </md-tab>
+  
+</md-tab-group>
