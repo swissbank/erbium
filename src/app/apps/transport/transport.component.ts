@@ -1136,4 +1136,9 @@ export class TransportComponent implements OnInit {
       });
 
   }
+  public backForm(){
+    this.edit = false;
+    //this.form.reset();
+    this.CreateForm();
+  }
 }

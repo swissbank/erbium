@@ -573,8 +573,9 @@ export class LinksComponent implements OnInit {
   sendEmail(row){
     this.appServie.sendEmail(row,row.id)
     .subscribe(res => {
-         alert("Die Email wurde verschickt");
+         alert("Bericht erfolgreich gesendet.");
       }, err => {
+          alert("Fehler: Der Bericht wurde nicht gesendet.");        
           console.log(err);
       }      
     )
@@ -1201,19 +1202,19 @@ export class LinksComponent implements OnInit {
 }
 
 
-//DAilogn Componenet
+//Dailog  Componenet
 
 
 @Component({
   selector: 'app-jazz-dialog',
   template: `
-  <h5 class="mt-0">Geben Sie E-Mail ein, um den Bericht</h5>
+  <h5 class="mt-0">Bericht senden</h5>
   <p style="text-align:center;height: 35px">
      <md-input-container class="mb-1" style="width: 100%;height: 60px;">
-       <input mdInput [(ngModel)]="currentUserEmail" placeholder="Email address" type="email">
+       <input mdInput [(ngModel)]="currentUserEmail" placeholder="E-Mail" type="email">
      </md-input-container>
   </p>
-  <div style="text-align: right"> <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(currentUserEmail)">senden</button> </div>`
+  <div style="text-align: right"> <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(currentUserEmail)">Senden</button> </div>`
 })
 export class JazzDialogComponent {
   public currentUserEmail;
