@@ -103,9 +103,9 @@
     margin-top: 20px;
     text-align: center;
 }
-table, th, td {
-   border: 1px solid black;
-}
+// table, th, td {
+//    border: 1px solid black;
+// }
 
  md-card{
     margin-top:2% !important;
@@ -176,7 +176,7 @@ md-tab-group {
 }
 }
 /deep/ .next-btn-last{
-    margin-left: 27% !important;
+    margin-left: 43% !important;
     margin-right:10px !important;
 }
 
@@ -191,7 +191,6 @@ md-tab-group {
 }
 
 .deleteButton {
-    position: absolute;
     width: 200px;
     color: white;
     display: inline-block;
@@ -214,7 +213,7 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
     width: 100%;
-    border: 1px solid #ddd;
+    //border: 1px solid #ddd;
 }
 
 th, td {
@@ -223,3 +222,16 @@ th, td {
 }
 
 tr:nth-child(even){background-color: #f2f2f2}
+ /deep/ .m-signature-pad{
+    width: 100% !important;
+    .m-signature-pad--body{
+        width: calc(100% - 39px);
+    }
+}
+.list-search__wrapper{
+    /deep/.mat-input-wrapper{
+        .mat-input-underline{
+            margin-top: 9px !important;
+        }
+    }
+}

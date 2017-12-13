@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule, Http } from '@angular/http';
 import { SignaturePadModule } from 'angular2-signature-pad';
 import { DateTimePickerModule } from 'ng-pick-datetime';
+import { WebCamComponent } from 'ng2-webcam';
 
 
 

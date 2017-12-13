@@ -18,8 +18,8 @@ import {ManagementService} from './../../management/management.service';
 import {AppsService} from '../apps.service';
 import {SharedService} from '../shared.service';
 import {LocalStorage} from '../../libs/localstorage';
-import { MdDialog, MdDialogRef, MdDialogConfig ,MD_DIALOG_DATA } from '@angular/material';
-import { Socket } from 'ng-socket-io';
+import {MdDialog, MdDialogRef, MdDialogConfig, MD_DIALOG_DATA} from '@angular/material';
+import {Socket} from 'ng-socket-io';
 
 @Component({selector: 'app-links', templateUrl: './links.component.html', styleUrls: ['./links.component.scss']})
 export class LinksComponent implements OnInit {
@@ -28,9 +28,9 @@ export class LinksComponent implements OnInit {
   count = 0;
   offset = 0;
   limit = 20;
-  dialogRef: MdDialogRef<JazzDialogComponent>;
-  lastCloseResult: string;
-  config: MdDialogConfig = {
+  dialogRef : MdDialogRef < JazzDialogComponent >;
+  lastCloseResult : string;
+  config : MdDialogConfig = {
     disableClose: false,
     width: '',
     height: '',
@@ -45,10 +45,10 @@ export class LinksComponent implements OnInit {
   public last_page_url;
   public totalCount;
   public current_page;
-  public  currentUserEmail:any;
+  public currentUserEmail : any;
   public currentId;
   public current_forklift_id;
-  public list =[];
+  public list = [];
   public updateRamp;
   public currentTransport : any = {
     shipmint: [
@@ -60,12 +60,12 @@ export class LinksComponent implements OnInit {
     fahrzeughalter: '',
     destination: ''
   };
-  public width : number = 600;
+  public width : number = 300;
   public height : number = 300;
   public user : any;
   public selectedIndex : number = 0;
   public noFooter : boolean = false;
-  public label : string = 'Sign above';
+  public label : string = 'Unterschrift Fahrer';
   opentabs = false;
   public tab1 = false;
   public tab2 = true;
@@ -73,7 +73,7 @@ export class LinksComponent implements OnInit {
   public tab4 = true;
   public tab5 = true;
   public newforklift = 0;
-  public images=[];
+  public images = [];
 
   public selectedObject : any = {};
   @Input('parentData')incomingData : any;
@@ -85,6 +85,7 @@ export class LinksComponent implements OnInit {
       ._sharedService
       .publishData(data);
   }
+  public search : any;
   public user_id : any = 1;
   public transport_id : any = 1;
   public fahrzeugausweis_21 : any = null;
@@ -114,7 +115,7 @@ export class LinksComponent implements OnInit {
   public persoenliche_schutzausruestung_43_vollschutzmaske : any = null;
   public persoenliche_schutzausruestung_43_augenspuelflasche : any = null;
   public persoenliche_schutzausruestung_43_handlampe : any = null;
-  public pulverloescher_plombiert_441 : any = null;
+  public pulverloescher_plombiert_441 : any = '';
   public pulverloescher_plombiert_441_pruefung : any = null;
   public unterkeil_schaufel_442 : any = null;
   public warnzeichen_warndreiecke_443 : any = null;
@@ -128,75 +129,99 @@ export class LinksComponent implements OnInit {
   public signature : Boolean = false;
   public adr = true;
   public prozess : any = 2;
-  
-  constructor(public socket: Socket , private _router : Router, private _logger : Logger, private _managementService : ManagementService, public appServie : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService, public dialog: MdDialog) {
+
+  constructor(public socket : Socket, private _router : Router, private _logger : Logger, private _managementService : ManagementService, public appServie : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService, public dialog : MdDialog) {
     this
       ._sharedService
       .caseNumber$
       .subscribe(data => {
         if (data && data['from'] == 'links') {
           console.log("Same Componenets");
-        }else if(data && data['from'] == 'edit'){
+        } else if (data && data['from'] == 'edit') {
           this.ngOnInit();
-        } 
-        else {
+        } else {
           this.ngOnInit();
         }
       });
-      let self = this;
-      this.socket.on('new-record', function(data){
-        if(data.from == 'add'){
+    let self = this;
+    this
+      .socket
+      .on('new-record', function (data) {
+        if (data.from == 'add') {
           self.fun(data);
-        }else{
+        } else {
           console.log("Its from list");
         }
       });
+    this.socket.on('prozess', function(data){
+      self.fun(data);
+    });  
   }
 
-  public fun(data){
+  public fun(data) {
     this.ngOnInit();
   }
 
-  
-  
+  public searchTransports() {
+    var self = this;
+    this
+      .appServie
+      .searchTransports("1", this.search)
+      .subscribe(data => {
+        console.log(data);
+        self.customData['rows'] = data.data.data;
+        self.customData.count = data.data.total;
+        self.customData.offset = 0;
+        self.customData.limit = 20;
+      }, err => {
+        console.log(err);
+      })
+
+  }
+
   public open(row) {
     this.currentUserEmail = this.user.user.email;
     var obj = {
       data: {
-        currentUserEmail:this.currentUserEmail
+        currentUserEmail: this.currentUserEmail
       }
     }
-    this.dialogRef = this.dialog.open(JazzDialogComponent,obj);
-    this.dialogRef.afterClosed().subscribe(result => {
-      if(result){
-        this.sendEmail({email:result,id:row.id});
-      }else{
-      }
-      this.lastCloseResult = result;
-      console.log("Closed Dailog Box",this.lastCloseResult);
-      this.dialogRef = null;
-    });
+    this.dialogRef = this
+      .dialog
+      .open(JazzDialogComponent, obj);
+    this
+      .dialogRef
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          this.sendEmail({email: result, id: row.id});
+        } else {}
+        this.lastCloseResult = result;
+        this.dialogRef = null;
+      });
   }
   public updateFilter(event) {
-    const val = event.target.value.toLowerCase();
+    const val = event
+      .target
+      .value
+      .toLowerCase();
 
     // filter our data
-    const temp = this.temp.filter(function(d) {
-      if(d.shipment){
-         if(d['shipment']){
-          for(let i =0 ;i< d['shipment'].length;i++){
-            console.log(d['shipment'][i]['shipment_id'].indexOf(val));
-            var valu = d['shipment'][i]['shipment_id'].indexOf(val) !== -1 || !val;
-            return valu;
+    const temp = this
+      .temp
+      .filter(function (d) {
+        if (d.shipment) {
+          if (d['shipment']) {
+            for (let i = 0; i < d['shipment'].length; i++) {
+              var valu = d['shipment'][i]['shipment_id'].indexOf(val) !== -1 || !val;
+              return valu;
+            }
           }
-         }
-      }
-      //return d.fahrer.toLowerCase().indexOf(val) !== -1 || !val;
-    });
+        }
+      });
 
     // update the rows
     this.customData.rows = temp;
-    // Whenever the filter changes, always go back to the first page
     this.customData.offset = 0;
   }
 
@@ -265,8 +290,7 @@ export class LinksComponent implements OnInit {
       {
         sr: '1.1',
         question: "An welcher Rampe wird die Prüfung vorgenommen?"
-      },
-      {
+      }, {
         sr: '1.2',
         question: "Eintrag in Fahrzeugausweis “Gefährliche Güter” für in der Schweiz immatrikuliert" +
             "en Beförderungseinheiten",
@@ -315,10 +339,10 @@ export class LinksComponent implements OnInit {
       {
         sr: '1.1',
         question: "An welcher Rampe wird die Prüfung vorgenommen?"
-      },
-      {
+      }, {
         sr: '1.5',
-        question: "Arbeitsbescheinigung des Fahrers: Personalausweis der Firma mit Foto und Firmennamen.?"
+        question: "Arbeitsbescheinigung des Fahrers: Personalausweis der Firma mit Foto und Firmenn" +
+            "amen.?"
       }
     ],
     count: 2,
@@ -369,14 +393,25 @@ export class LinksComponent implements OnInit {
         sr: '3.3',
         question: "Persönliche Schutzausrüstung pro Besatzungsmitglied. Entweder: Typengeprüftes, p" +
             "lombiertes Notbesteck mit Inhaltsverzeichnis",
-        question2: "(gleicher Inhalt wie unten)",
+        question2: "(leicher inhalt wie unten)",
         question3: "1x geschlossene Schutzbrille",
         question4: "1x Paar lange chemikalienbeständige Handschuhe EN374/EN388",
         question5: "1x Warnweste (EN 471) ",
         question6: "1x Vollschutzmaske (resp. Halbmaske) mit Mehrbereichsfilter wie ABEK (EN 141)",
         question7: "1x Augenspülflasche mit reinem Wasser",
-        question8: "1x Handlampe Ex. sicher"
-
+        question8: "1x Handlampe Ex. sicher",
+        question9: "Pulverlöscher plombiert",
+        question10: 'Fälligkeit der nächsten Prüfung:',
+        question11: `'1x 2kg + 10kg (min. davon 1x 6kg) für alle Beförderungseinheiten  > 7.5 to
+                     1x 2kg + 1x 6kg für alle Beförderungseinheiten > 3.5 to bis  7.5 to
+                     2x 2kg für alle Beförderungseinheiten bis 3.5 to'`,
+        question12: `1x Unterkeil pro Fahrzeug
+                    1x Schaufel`,
+        question13: '2x selbststehende Warnzeichen (z.B. reflektierende Kegel oder Warndreiecke oder ' +
+            '2 orangefarbene Warnblinkleuchten, die von der elektrischen Ausrüstung des Fahrz' +
+            'euges unabhängig sind)',
+        question14: '1x Auffangbehälter',
+        question15: '1x Kanalisationsabdeckung'
       }
     ],
     count: 4,
@@ -406,14 +441,16 @@ export class LinksComponent implements OnInit {
   protectionOfPublic = {
     rows: [
       {
-        sr: '3.4',
-        question: `Fälligkeit der nächsten Prüfung:`,
+        sr: '4',
+        question: `Intermediate Bulk Container (IBC); Datum der letzten Prüfung: (ADR 6.5.1)    Ist die Prüffrist von  2.5 Jahren seit letzter Prüfung eingehalten?  Wenn Nein, dürfen die IBCs nicht verladen werden.`,
         question2: `
-        1x 2kg + 10kg (min. davon 1x 6kg) für alle Beförderungseinheiten  > 7.5 to              1x 2kg + 1x 6kg für alle Beförderungseinheiten > 3.5 to bis  7.5 to                                2x 2kg für alle Beförderungseinheiten bis 3.5 to
+        Wurden nur unbeschädigte einwandfreie Versandstücke mit UN Codierung übergeben? 
         `,
-        question3: `1 Unterkeil pro Fahrzeug
-                    1 Schaufel`,
-        question4: `2 selbststehende Warnzeichen (z.B. reflektierende Kegel oder Warndreiecke oder 2 orangefarbene Warnblinkleuchten, die von der elektrischen Ausrüstung des Fahrzeuges unabhängig sind)`,
+        question3: `Wurde eine wirksame Ladungssicherung angebracht?  
+        (Antirutschmatten, keine Leerräume, Formschluss der Ladung, Verteilung des Gewichts auf die Achsen, Ware festgemacht und verzurrt)
+        `,
+        question4: `Wurde die Ladungssicherung mit Foto dokumentiert
+        `,
         question5: "1 Auffangbehälter",
         question6: "1 Kanalisationsabdeckung"
       }
@@ -461,29 +498,18 @@ export class LinksComponent implements OnInit {
     limit: 10
   }
 
-
-  public OnchangeRamp(){
+  public OnchangeRamp() {
     var obj = {
-      rampe:this.updateRamp
+      rampe: this.updateRamp
     }
-    this.appServie.updateRampe(obj,this.currentTransport.id)
-    .subscribe(res => {
-        this
-          ._logger
-          .log("OnchangeRamp Transports");
-        this
-          ._logger
-          .log(res);
-        console.log(res);
-       
+    this
+      .appServie
+      .updateRampe(obj, this.currentTransport.id)
+      .subscribe(res => {
+        console.log("Update Rampe",res);
       }, err => {
-        this
-          ._logger
-          .error("OnchangeRamp Error");
-        this
-          ._logger
-          .error(err);
-      })
+        console.log("Error Update Rampe",err);
+      });
   }
 
   ngOnInit() {
@@ -492,22 +518,12 @@ export class LinksComponent implements OnInit {
       .appServie
       .getRamps()
       .subscribe(res => {
-        this
-          ._logger
-          .log("getRamps response");
-        this
-          ._logger
-          .log(res);
         for (let key in res) {
-          this.list.push({id: key, name: res[key]})
+          this
+            .list
+            .push({id: key, name: res[key]})
         }
       }, err => {
-        this
-          ._logger
-          .error("getRamps error");
-        this
-          ._logger
-          .error(err);
       });
     this.user = this
       ._localstorage
@@ -537,7 +553,9 @@ export class LinksComponent implements OnInit {
   page(offset, limit) {
     const start = offset * limit;
     const end = start + limit;
-    this.user = this._localstorage.getObject('user_token');
+    this.user = this
+      ._localstorage
+      .getObject('user_token');
     this.currentId = 0;
     this.current_forklift_id = 0;
     var self = this;
@@ -547,10 +565,9 @@ export class LinksComponent implements OnInit {
       self.customData.count = self.totalCount;
       self.customData.offset = 0;
       self.customData.limit = 20;
-    }, offset+1);
+    }, offset + 1);
   }
   onPage(event) {
-    console.log('Page Event', event);
     this.page(event.offset, event.limit);
   }
   fetchData(cb, page) {
@@ -559,10 +576,10 @@ export class LinksComponent implements OnInit {
       .appServie
       .getAllTransporters(page)
       .subscribe(res => {
-          self.next_page_url = res.data.next_page_url;
-          self.last_page_url = res.data.last_page;
-          self.current_page = res.data.current_page;
-          self.totalCount = res.data.total;
+        self.next_page_url = res.data.next_page_url;
+        self.last_page_url = res.data.last_page;
+        self.current_page = res.data.current_page;
+        self.totalCount = res.data.total;
         cb(res);
       }, err => {
         this
@@ -570,15 +587,16 @@ export class LinksComponent implements OnInit {
           .error(err);
       })
   }
-  sendEmail(row){
-    this.appServie.sendEmail(row,row.id)
-    .subscribe(res => {
-         alert("Bericht erfolgreich gesendet.");
+  sendEmail(row) {
+    this
+      .appServie
+      .sendEmail(row, row.id)
+      .subscribe(res => {
+        alert("Bericht erfolgreich gesendet.");
       }, err => {
-          alert("Fehler: Der Bericht wurde nicht gesendet.");        
-          console.log(err);
-      }      
-    )
+        alert("Fehler: Der Bericht wurde nicht gesendet.");
+        console.log(err);
+      })
     console.log(row);
   }
   openTabs(id, event, forklift_id, row) {
@@ -591,57 +609,72 @@ export class LinksComponent implements OnInit {
       }
       this.currentTransport = row;
       if (!this.currentTransport['shipment'] || !this.currentTransport['shipment'] == null) {
-        this.currentTransport['shipment'] = [{shipmint_id:''}];
+        this.currentTransport['shipment'] = [
+          {
+            shipmint_id: ''
+          }
+        ];
       }
       row.from = 'links'
       this
         ._sharedService
         .publishData(row);
-     this.updateRamp = row['rampe'];
-     if(row['forklift'] && typeof row['forklift'] ==  "object"){
-      for (let key in row.forklift){
-        if(( this[key]  || this[key] == null || this[key] == "" || !this[key]) && key !='id'){
-          this[key] = row.forklift[key]+"";
+      this.updateRamp = row['rampe'];
+      if (row['forklift'] && typeof row['forklift'] == "object") {
+        for (let key in row.forklift) {
+          if ((this[key] || this[key] == null || this[key] == "" || !this[key]) && key != 'id') {
+            this[key] = row.forklift[key] + "";
+          }
         }
-     }
-     }
-        
+      }
+
     }
     if (event == 'edit') {
       if (!this.currentTransport['shipment'] || !this.currentTransport['shipment'] == null) {
-          this.currentTransport['shipment'] = [{shipmint_id:''}];
+        this.currentTransport['shipment'] = [
+          {
+            shipmint_id: ''
+          }
+        ];
 
       }
       this.opentabs = true;
       this.currentId = id;
-     if(typeof  row.forklift == 'object' &&  row.forklift != null){
-            this.newforklift = row['forklift']['id'];
-            if(row['forklift']['image']){
-              this.images = row['forklift']['image'];
-            }
-             for (let key in row.forklift){
-                  if(( this[key]  || this[key] == null || this[key] == "" || !this[key]) && key !='id'){
-                        this[key] = row.forklift[key]+"";
-                  }
-              }
-          }else{
-              this.currentId = id;
-              if((typeof this.currentTransport['forklift']) == 'object' && this.currentTransport['forklift'] != null){
-                  this.current_forklift_id = this.currentTransport['forklift']['id']? this.currentTransport['forklift']['id']: forklift_id;  
-                  this.newforklift = this.current_forklift_id;
-              }else{
-                  this.current_forklift_id = forklift_id;
-                  this.newforklift = this.current_forklift_id;
-              }  
+      if (typeof row.forklift == 'object' && row.forklift != null) {
+        this.newforklift = row['forklift']['id'];
+        if (row['forklift']['image']) {
+          this.images = row['forklift']['image'];
         }
-      
-      for(var i=0;i<this.customData['rows'].length;i++){
-        if(id == this.customData['rows'][i]['id']){
+        for (let key in row.forklift) {
+          if ((this[key] || this[key] == null || this[key] == "" || !this[key]) && key != 'id') {
+            this[key] = row.forklift[key] + "";
+          }
+        }
+        if (row['forklift']['prozess']) {
+          for (let i = 1; i <= row['forklift']['prozess']; i++) {
+            this['tab' + i] = false;
+          }
+          this.selectedIndex = row['forklift']['prozess'] - 1;
+        }
+      } else {
+        this.currentId = id;
+        if ((typeof this.currentTransport['forklift']) == 'object' && this.currentTransport['forklift'] != null) {
+          this.current_forklift_id = this.currentTransport['forklift']['id']
+            ? this.currentTransport['forklift']['id']
+            : forklift_id;
+          this.newforklift = this.current_forklift_id;
+        } else {
+          this.current_forklift_id = forklift_id;
+          this.newforklift = this.current_forklift_id;
+        }
+      }
+
+      for (var i = 0; i < this.customData['rows'].length; i++) {
+        if (id == this.customData['rows'][i]['id']) {
           this.customData['rows'][i]['forklift'] = this.user.user.id;
         }
       }
 
-       
       return;
     }
     var obj = {
@@ -656,42 +689,46 @@ export class LinksComponent implements OnInit {
         console.log(res);
         this.currentTransport = res.data;
         if (!this.currentTransport['shipment'] || !this.currentTransport['shipment'] == null) {
-          this.currentTransport['shipment'] = [{shipmint_id:''}];
+          this.currentTransport['shipment'] = [
+            {
+              shipmint_id: ''
+            }
+          ];
         }
-        if((typeof res.data['forklift']) == 'object' && res.data['forklift'] != null){
-            this.newforklift = res.data['forklift']['id'];
+        if ((typeof res.data['forklift']) == 'object' && res.data['forklift'] != null) {
+          this.newforklift = res.data['forklift']['id'];
         }
         this.opentabs = true;
         console.log(res);
       }, err => {
-        if(err.message == "Transport already start please chose any other transport."){
-            alert("Der Transport hat bereits begonnen, bitte wählen Sie einen anderen Transport aus.");
-            this.ngOnInit();
-           console.log(err);
-        }else{
+        if (err.message == "Transport already start please chose any other transport.") {
+          alert("Der Transport hat bereits begonnen, bitte wählen Sie einen anderen Transport aus" +
+              ".");
+          this.ngOnInit();
+          console.log(err);
+        } else {
           alert(err.message);
           console.log(err);
         }
-        
+
       })
 
   }
   closeTabs() {
     this.opentabs = false;
     this.adr = true;
+    this.ngOnInit();
   }
 
   editTransport(obj) {}
 
   onClearHandler() {
     console.log('onclear clicked...');
-   // this.opentabs = false;
+    // this.opentabs = false;
   }
 
   onSaveHandler(data) {
-    console.log('onsave clicked', data);
     var image = this.dataURLtoFiles(data, 'signature.png')
-    console.log(image);
     this.postSignatue(image);
   }
   changeTab(event) {
@@ -712,7 +749,7 @@ export class LinksComponent implements OnInit {
   postFile(inputValue : any) {
     var formData = new FormData();
     formData.append("picture[]", inputValue.files[0]);
-    if(this.images.length >=3){
+    if (this.images.length >= 3) {
       alert("Du hast bereits Bilder hochgeladen");
       return false;
     }
@@ -737,15 +774,57 @@ export class LinksComponent implements OnInit {
       .appServie
       .uploadForkliftSignature(formData, this.newforklift)
       .subscribe(res => {
-          this.signature = true;
-          alert("Signatur hochgeladen");
+        this.signature = true;
+        alert("Signatur hochgeladen");
       }, err => {
-       this
+        this
           ._logger
           .error(err);
       })
   }
-
+  restoreVars(){
+    this.fahrzeugausweis_21 = null;
+    this.adr_schulungsbescheinigung_22 = null;
+    this.adr_schulungsbescheinigung_22_answeis_nr = "";
+    this.adr_schulungsbescheinigung_22_gultig_bis = "";
+    this.lichtbildausweis_23 = 1;
+    this.arbeitsbescheinigung_fahrer_24 = null;
+    this.vertrauensabfertigung_25 = null;
+    this.orangefarbene_warntafeln_26 = null;
+    this.schriftliche_weisungen_27 = null;
+    this.bewegungssicherung_31 = null;
+    this.visuelle_ueberpruefung_32 = null;
+    this.ladungsbruecke_besenrein_33 = null;
+    this.ladungssicherungsmittel_34 = null;
+    this.ladungssicherungsmittel_34_gurte = null;
+    this.ladungssicherungsmittel_34_spannstangen = null;
+    this.ladungssicherungsmittel_34_antirutschmatten = null;
+    this.ladungssicherungsmittel_34_leerpaletten = null;
+    this.werbefrei_fuer_tierfutter_41 = null;
+    this.lebensmittel_futtermittel_42 = null;
+    this.persoenliche_schutzausruestung_43 = null;
+    this.persoenliche_schutzausruestung_43_plomben_nr = null;
+    this.persoenliche_schutzausruestung_43_schutzbrille = null;
+    this.persoenliche_schutzausruestung_43_chem_handschuhe = null;
+    this.persoenliche_schutzausruestung_43_warnweste = null;
+    this.persoenliche_schutzausruestung_43_vollschutzmaske = null;
+    this.persoenliche_schutzausruestung_43_augenspuelflasche = null;
+    this.persoenliche_schutzausruestung_43_handlampe = null;
+    this.pulverloescher_plombiert_441 = '';
+    this.pulverloescher_plombiert_441_pruefung = null;
+    this.unterkeil_schaufel_442 = null;
+    this.warnzeichen_warndreiecke_443 = null;
+    this.auffangbehaelter_444 = null;
+    this.kanalisationsabdeckung_445 = null;
+    this.ibc_prueffrist_51 = null;
+    this.ibc_prueffrist_51_date = null;
+    this.unbeschaedigte_verandstuecke_un_cod_52 = null;
+    this.wirksame_ladungssicherung_53 = null;
+    this.ladungssicherung_foto_54 = null;
+    this.signature = false;
+    this.adr = true;
+    this.prozess = 2;
+  }
   dataURLtoFile(dataurl, filename) {
     var arr = dataurl.split(','),
       mime = arr[0].match(/:(.*?);/)[1],
@@ -790,18 +869,21 @@ export class LinksComponent implements OnInit {
         : second;
     return formatedDay + "." + formatedMonth + "." + year + " | " + formatedHour + ':' + formatedMinute + " Uhr";
   }
-  
-  deleteImage (row,index){
+
+  deleteImage(row, index) {
     console.log(index);
-    let id =this.current_forklift_id;
-     this.appServie.deleteImage(row,id)
-    .subscribe(res => {
-          console.log(res);
-          this.images.splice(index,1);
+    let id = this.current_forklift_id;
+    this
+      .appServie
+      .deleteImage(row, id)
+      .subscribe(res => {
+        console.log(res);
+        this
+          .images
+          .splice(index, 1);
       }, err => {
-          console.log(err);
-      }      
-    )
+        console.log(err);
+      })
     console.log(row);
   }
 
@@ -822,10 +904,8 @@ export class LinksComponent implements OnInit {
         'orangefarbene_warntafeln_26',
         'schriftliche_weisungen_27'
       ];
-      if(this.adr == false){
-        var requirements = [
-        'arbeitsbescheinigung_fahrer_24'
-      ];
+      if (this.adr == false) {
+        var requirements = ['arbeitsbescheinigung_fahrer_24'];
       }
       for (var i = 0; i < requirements.length; i++) {
         if (this[requirements[i]] == null || this[requirements[i]] == '') {
@@ -843,24 +923,24 @@ export class LinksComponent implements OnInit {
         .subscribe(res => {
           console.log(res);
           var id = '';
-          if(res['data']){
-             if(res['data']['id']){
-              this.current_forklift_id =res['data']['id']; 
-             }else{
+          if (res['data']) {
+            if (res['data']['id']) {
+              this.current_forklift_id = res['data']['id'];
+            } else {
               if (this.currentTransport['forklift']) {
-                  id = this.currentTransport['forklift']['id'];
-                  this.current_forklift_id = this.currentTransport['forklift']['id'];
+                id = this.currentTransport['forklift']['id'];
+                this.current_forklift_id = this.currentTransport['forklift']['id'];
               } else {
-                  if (this.currentTransport['forklift_id']) {
-                      id = this.currentTransport['forklift_id'];
-                      this.current_forklift_id = id;
-                  } else {
-                      if (!this.current_forklift_id) {
-                        this.current_forklift_id = res['data']['id'];
-                      }
+                if (this.currentTransport['forklift_id']) {
+                  id = this.currentTransport['forklift_id'];
+                  this.current_forklift_id = id;
+                } else {
+                  if (!this.current_forklift_id) {
+                    this.current_forklift_id = res['data']['id'];
                   }
+                }
               }
-             }
+            }
           }
           this.tab2 = false;
           this.changeTab('next');
@@ -908,24 +988,24 @@ export class LinksComponent implements OnInit {
             .log(res);
           console.log(res);
           var id = '';
-         if(res['data']){
-             if(res['data']['id']){
-              this.current_forklift_id =res['data']['id']; 
-             }else{
+          if (res['data']) {
+            if (res['data']['id']) {
+              this.current_forklift_id = res['data']['id'];
+            } else {
               if (this.currentTransport['forklift']) {
-                  id = this.currentTransport['forklift']['id'];
-                  this.current_forklift_id = this.currentTransport['forklift']['id'];
+                id = this.currentTransport['forklift']['id'];
+                this.current_forklift_id = this.currentTransport['forklift']['id'];
               } else {
-                  if (this.currentTransport['forklift_id']) {
-                      id = this.currentTransport['forklift_id'];
-                      this.current_forklift_id = id;
-                  } else {
-                      if (!this.current_forklift_id) {
-                        this.current_forklift_id = res['data']['id'];
-                      }
+                if (this.currentTransport['forklift_id']) {
+                  id = this.currentTransport['forklift_id'];
+                  this.current_forklift_id = id;
+                } else {
+                  if (!this.current_forklift_id) {
+                    this.current_forklift_id = res['data']['id'];
                   }
+                }
               }
-             }
+            }
           }
           this.tab3 = false;
           this.changeTab('next');
@@ -953,14 +1033,17 @@ export class LinksComponent implements OnInit {
         'persoenliche_schutzausruestung_43_chem_handschuhe',
         'persoenliche_schutzausruestung_43_warnweste',
         'persoenliche_schutzausruestung_43_vollschutzmaske',
-        'persoenliche_schutzausruestung_43_augenspuelflasche'
+        'persoenliche_schutzausruestung_43_augenspuelflasche',
+        'pulverloescher_plombiert_441',
+        'pulverloescher_plombiert_441_pruefung',
+        'unterkeil_schaufel_442',
+        'warnzeichen_warndreiecke_443',
+        'auffangbehaelter_444',
+        'kanalisationsabdeckung_445'
       ];
-      if(this.adr == false){
-      var requirements = [
-        'werbefrei_fuer_tierfutter_41',
-        'lebensmittel_futtermittel_42'
-      ];
-        
+      if (this.adr == false) {
+        var requirements = ['werbefrei_fuer_tierfutter_41', 'lebensmittel_futtermittel_42'];
+
       }
       for (var i = 0; i < requirements.length; i++) {
         if (this[requirements[i]] == null || this[requirements[i]] == '') {
@@ -985,24 +1068,24 @@ export class LinksComponent implements OnInit {
             .log(res);
           console.log(res);
           var id = '';
-          if(res['data']){
-             if(res['data']['id']){
-              this.current_forklift_id =res['data']['id']; 
-             }else{
+          if (res['data']) {
+            if (res['data']['id']) {
+              this.current_forklift_id = res['data']['id'];
+            } else {
               if (this.currentTransport['forklift']) {
-                  id = this.currentTransport['forklift']['id'];
-                  this.current_forklift_id = this.currentTransport['forklift']['id'];
+                id = this.currentTransport['forklift']['id'];
+                this.current_forklift_id = this.currentTransport['forklift']['id'];
               } else {
-                  if (this.currentTransport['forklift_id']) {
-                      id = this.currentTransport['forklift_id'];
-                      this.current_forklift_id = id;
-                  } else {
-                      if (!this.current_forklift_id) {
-                        this.current_forklift_id = res['data']['id'];
-                      }
+                if (this.currentTransport['forklift_id']) {
+                  id = this.currentTransport['forklift_id'];
+                  this.current_forklift_id = id;
+                } else {
+                  if (!this.current_forklift_id) {
+                    this.current_forklift_id = res['data']['id'];
                   }
+                }
               }
-             }
+            }
           }
           this.changeTab('next');
           this.tab4 = false;
@@ -1020,14 +1103,16 @@ export class LinksComponent implements OnInit {
         transport_id: this.currentTransport.id,
         user_id: this.user.user.id
       }
-      var requirements = ['auffangbehaelter_444', 'kanalisationsabdeckung_445'];
+      var requirements = ['ibc_prueffrist_51', 'ibc_prueffrist_51_date', 'unbeschaedigte_verandstuecke_un_cod_52', 'wirksame_ladungssicherung_53', 'ladungssicherung_foto_54'];
       for (var i = 0; i < requirements.length; i++) {
         obj[requirements[i]] = this[requirements[i]];
       }
 
       obj['prozess'] = 4;
       obj['newforklift'] = this.newforklift;
-
+      if (this.pulverloescher_plombiert_441_pruefung) {
+        obj['pulverloescher_plombiert_441_pruefung'] = this.pulverloescher_plombiert_441_pruefung;
+      }
       this
         .appServie
         .updateForklist(obj)
@@ -1040,24 +1125,24 @@ export class LinksComponent implements OnInit {
             .log(res);
           console.log(res);
           var id = '';
-         if(res['data']){
-             if(res['data']['id']){
-              this.current_forklift_id =res['data']['id']; 
-             }else{
+          if (res['data']) {
+            if (res['data']['id']) {
+              this.current_forklift_id = res['data']['id'];
+            } else {
               if (this.currentTransport['forklift']) {
-                  id = this.currentTransport['forklift']['id'];
-                  this.current_forklift_id = this.currentTransport['forklift']['id'];
+                id = this.currentTransport['forklift']['id'];
+                this.current_forklift_id = this.currentTransport['forklift']['id'];
               } else {
-                  if (this.currentTransport['forklift_id']) {
-                      id = this.currentTransport['forklift_id'];
-                      this.current_forklift_id = id;
-                  } else {
-                      if (!this.current_forklift_id) {
-                        this.current_forklift_id = res['data']['id'];
-                      }
+                if (this.currentTransport['forklift_id']) {
+                  id = this.currentTransport['forklift_id'];
+                  this.current_forklift_id = id;
+                } else {
+                  if (!this.current_forklift_id) {
+                    this.current_forklift_id = res['data']['id'];
                   }
+                }
               }
-             }
+            }
           }
           this.tab5 = false;
           this.changeTab('next');
@@ -1079,8 +1164,8 @@ export class LinksComponent implements OnInit {
       var requirements = ['signature'];
 
       for (var i = 0; i < requirements.length; i++) {
-        if(this.signature == false){
-           alert("Bitte prüfen Sie die Punkte vollständig.")
+        if (this.signature == false) {
+          alert("Bitte prüfen Sie die Punkte vollständig.")
           return false;
         }
       }
@@ -1112,114 +1197,48 @@ export class LinksComponent implements OnInit {
         .appServie
         .updateForklist(obj)
         .subscribe(res => {
-          this
-            ._logger
-            .log("updateForkliftTransport Transports");
-          this
-            ._logger
-            .log(res);
-          console.log(res);
+          this._logger.log(res);
           this.selectedIndex = 1;
           var id = '';
           this.currentTransport = {};
-
           this.current_forklift_id = 0;
           this.newforklift = 0;
           this.images = [];
-          this.user = this
-      ._localstorage
-      .getObject('user_token');
-    this.currentId = 0;
-    this.current_forklift_id = 0;
-    var self = this;
-      this.fetchData(function (data) {
-      // console.log(data);
-      // var arr = [];
-      // if(self.user.user.type ==2 || self.user.user.type ==1){
-      //   for (var i = 0; i < data.data.data.length; i++) {
-      //     arr.push(data.data.data[i])
-      //   }
-      // }else if (self.user.user.type == 3) {
-      //   for (var i = 0; i < data.data.data.length; i++) {
-      //     if(typeof data.data.data[i]['forklift'] == 'object'){
-      //        if(data.data.data[i]['forklift']['prozess']==5){
-      //         console.log("Already Finished");
-      //        }else{
-      //         arr.push(data.data.data[i])
-      //        }
-      //     }else if(typeof data.data.data[i]['forklift'] == 'number'){
-      //       arr.push(data.data.data[i]);
-      //     }else {
-      //       arr.push(data.data.data[i]);
-      //     }
-          
-      //   }
-
-        
-      // } else {
-      //   for (var i = 0; i < data.data.data.length; i++) {
-      //     if (data.data.data[i]['forklift_id'] == 0 || data.data.data[i]['forklift_id'] == self.user.user.id) {
-      //       if(typeof data.data.data[i]['forklift'] == 'object'){
-      //        if(data.data.data[i]['forklift']['prozess']==5){
-      //         console.log("Already Finished");
-      //        }else{
-      //         arr.push(data.data.data[i])
-      //        }
-      //     }else if(typeof data.data.data[i]['forklift'] == 'number'){
-      //       arr.push(data.data.data[i]);
-      //     }else {
-      //       arr.push(data.data.data[i]);
-      //     }
-      //     }
-      //   }
-      // }
-      //  var arrList = _.reverse(arr);
-      //  var newArr = _.sortBy(arrList,'forklift_id');
-      // self.temp = [...newArr]; 
-      // self.customData['rows'] = newArr;
-      // self.customData.count = newArr.length;
-      // self.customData.offset = 0;
-      // self.customData.limit = 20;
-      self.customData['rows'] = [];
-      self.customData['rows'] = data.data.data;
-      self.customData.count = self.totalCount;
-      self.customData.offset = 0;
-      self.customData.limit = 20;
-     
-    }, 1);
+          this.user = this._localstorage.getObject('user_token');
+          this.currentId = 0;
+          this.current_forklift_id = 0;
+          var self = this;
+          this.restoreVars();
+          this.fetchData(function (data) {
+            self.customData['rows'] = [];
+            self.customData['rows'] = data.data.data;
+            self.customData.count = self.totalCount;
+            self.customData.offset = 0;
+            self.customData.limit = 20;
+          }, 1);
           this.opentabs = false;
         }, err => {
-          this
-            ._logger
-            .error("updateForkliftTransport Error");
-          this
-            ._logger
-            .error(err);
-        })
-
+          this._logger.error("updateForkliftTransport Error");
+          this._logger.error(err);
+        });
     }
   }
-}
 
+}
 
 //Dailog  Componenet
 
-
-@Component({
-  selector: 'app-jazz-dialog',
-  template: `
+@Component({selector: 'app-jazz-dialog', template: `
   <h5 class="mt-0">Bericht senden</h5>
   <p style="text-align:center;height: 35px">
      <md-input-container class="mb-1" style="width: 100%;height: 60px;">
        <input mdInput [(ngModel)]="currentUserEmail" placeholder="E-Mail" type="email">
      </md-input-container>
   </p>
-  <div style="text-align: right"> <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(currentUserEmail)">Senden</button> </div>`
-})
+  <div style="text-align: right"> <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(currentUserEmail)">Senden</button> </div>`})
 export class JazzDialogComponent {
   public currentUserEmail;
-  constructor( public dialogRef: MdDialogRef <JazzDialogComponent>) {
-     this.currentUserEmail = this.dialogRef._containerInstance.dialogConfig.data.currentUserEmail;
+  constructor(public dialogRef : MdDialogRef < JazzDialogComponent >) {
+    this.currentUserEmail = this.dialogRef._containerInstance.dialogConfig.data.currentUserEmail;
   }
-} 
-
+}

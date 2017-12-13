@@ -335,6 +335,8 @@ var AppRoutes = [{
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_angular2_logger_core___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_angular2_logger_core__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__libs_localstorage__ = __webpack_require__("../../../../../src/app/libs/localstorage.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__config_config__ = __webpack_require__("../../../../../src/app/config/config.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_ng_socket_io__ = __webpack_require__("../../../../ng-socket-io/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_ng_socket_io___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_ng_socket_io__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -354,78 +356,68 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var AppsService = (function () {
-    function AppsService(_http, _localstorage, _config, _logger) {
+    function AppsService(socket, _http, _localstorage, _config, _logger) {
+        this.socket = socket;
         this._http = _http;
         this._localstorage = _localstorage;
         this._config = _config;
         this._logger = _logger;
         this.remoteUrl = "https://erbium.ch/backend/api/";
-        this
-            ._logger
-            .log("AppsService constructor called");
     }
     AppsService.prototype.getAllTransporters = function (page) {
-        var _this = this;
-        this
-            ._logger
-            .log("getUsers called.");
         var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc";
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
-        // let options       = new RequestOptions({ headers: headers }); // Create a
-        // request option
+        return this._http
+            .get(url, { headers: headers })
+            .map(function (res) {
+            var response = res.json();
+            return response;
+        })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
+    };
+    AppsService.prototype.searchTransports = function (page, shipement) {
+        var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&shipement=" + shipement;
+        var user_token = this._localstorage.getObject('user_token');
+        var token = user_token.access_token;
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
+        headers.append('Authorization', 'Bearer ' + token);
         return this
             ._http
             .get(url, { headers: headers })
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.getTransporter = function (formData) {
-        var _this = this;
-        this
-            ._logger
-            .log("getUsers called.");
         var url = this.remoteUrl + "transports/" + formData['id'];
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
-        // let options       = new RequestOptions({ headers: headers }); // Create a
-        // request option
-        return this
-            ._http
+        return this._http
             .get(url, { headers: headers })
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.addTransporter = function (formData) {
-        var _this = this;
-        this
-            ._logger
-            .log("addTransporter called.");
         var url = this.remoteUrl + "transports";
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -436,22 +428,15 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.updateTransporter = function (formData) {
-        var _this = this;
-        this
-            ._logger
-            .log("addTransporter called.");
         var url = this.remoteUrl + "transports/" + formData['id'];
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -463,22 +448,15 @@ var AppsService = (function () {
             .put(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.pickAndstart = function (formData) {
-        var _this = this;
-        this
-            ._logger
-            .log("pickAndstart called.");
         var url = this.remoteUrl + "transports/pick-start/" + formData['id'];
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -489,22 +467,15 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.getRamps = function () {
-        var _this = this;
-        this
-            ._logger
-            .log("getRamps called.");
         var url = this.remoteUrl + "rampe";
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -513,22 +484,15 @@ var AppsService = (function () {
             .get(url, { headers: headers })
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.getForkLift = function () {
-        var _this = this;
-        this
-            ._logger
-            .log("getRamps called.");
         var url = this.remoteUrl + "forklifts";
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -537,49 +501,36 @@ var AppsService = (function () {
             .get(url, { headers: headers })
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.updateForklist = function (formData) {
         var _this = this;
-        this
-            ._logger
-            .log("pickAndstart called.");
         var url = this.remoteUrl + "forklifts/" + formData['newforklift'];
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
         var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({ headers: headers });
-        // formData['forklift_id'] = user_token.user['id']; 
         formData['_method'] = "PUT";
         return this
             ._http
             .put(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
+            _this.socket.emit('prozess', response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.uploadForkliftImage = function (formData, id) {
-        var _this = this;
-        this
-            ._logger
-            .log("pickAndstart called.");
         var url = this.remoteUrl + "forklifts/images-update/" + id;
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': undefined, withCredentials: true }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -590,21 +541,14 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.uploadForkliftSignature = function (formData, id) {
-        var _this = this;
-        this
-            ._logger
-            .log("pickAndstart called.");
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var url = this.remoteUrl + "forklifts/update/signature/" + id;
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': undefined, withCredentials: true }); // ... Set content type to JSON
@@ -616,22 +560,15 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.getForkLiftId = function (id) {
-        var _this = this;
-        this
-            ._logger
-            .log("getForkLiftId called.");
         var url = this.remoteUrl + "forklifts/" + id;
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -640,21 +577,14 @@ var AppsService = (function () {
             .get(url, { headers: headers })
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.updateRampe = function (formData, transport_id) {
-        var _this = this;
-        this
-            ._logger
-            .log("updateRampe called.");
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var url = this.remoteUrl + "transports/rampe/" + transport_id;
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json', withCredentials: true }); // ... Set content type to JSON
@@ -666,22 +596,15 @@ var AppsService = (function () {
             .put(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.sendEmail = function (formData, id) {
-        var _this = this;
-        this
-            ._logger
-            .log("pickAndstart called.");
         var url = this.remoteUrl + "transports/send/report/" + id;
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': undefined, withCredentials: true }); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -692,22 +615,15 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     AppsService.prototype.deleteImage = function (formData, id) {
-        var _this = this;
-        this
-            ._logger
-            .log("deleteImage called.");
         var url = this.remoteUrl + 'forklift/del-images/' + id + '/' + formData.id;
-        var user_token = this
-            ._localstorage
-            .getObject('user_token');
+        var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"](); // ... Set content type to JSON
         headers.append('Authorization', 'Bearer ' + token);
@@ -717,21 +633,20 @@ var AppsService = (function () {
             .delete(url, options)
             .map(function (res) {
             var response = res.json();
-            _this
-                ._logger
-                .log(response);
             return response;
         })
-            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || { message: 'Server error' }); });
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
     };
     return AppsService;
 }());
 AppsService = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_8__libs_localstorage__["a" /* LocalStorage */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_8__libs_localstorage__["a" /* LocalStorage */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_9__config_config__["a" /* Config */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_9__config_config__["a" /* Config */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_7_angular2_logger_core__["Logger"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_7_angular2_logger_core__["Logger"]) === "function" && _d || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_10_ng_socket_io__["Socket"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_10_ng_socket_io__["Socket"]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_http__["Http"]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_8__libs_localstorage__["a" /* LocalStorage */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_8__libs_localstorage__["a" /* LocalStorage */]) === "function" && _c || Object, typeof (_d = typeof __WEBPACK_IMPORTED_MODULE_9__config_config__["a" /* Config */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_9__config_config__["a" /* Config */]) === "function" && _d || Object, typeof (_e = typeof __WEBPACK_IMPORTED_MODULE_7_angular2_logger_core__["Logger"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_7_angular2_logger_core__["Logger"]) === "function" && _e || Object])
 ], AppsService);
 
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 //# sourceMappingURL=apps.service.js.map
 
 /***/ }),
