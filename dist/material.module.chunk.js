@@ -1420,7 +1420,7 @@ var SnackbarComponent = (function () {
         this.addExtraClass = false;
     }
     SnackbarComponent.prototype.open = function () {
-        var config = new __WEBPACK_IMPORTED_MODULE_1__angular_material__["q" /* MdSnackBarConfig */]();
+        var config = new __WEBPACK_IMPORTED_MODULE_1__angular_material__["r" /* MdSnackBarConfig */]();
         config.duration = this.autoHide;
         config.extraClasses = this.addExtraClass ? ['party'] : null;
         this.snackBar.open(this.message, this.action && this.actionButtonLabel, config);
@@ -1433,7 +1433,7 @@ SnackbarComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/material/snackbar/snackbar.component.html"),
         styles: [__webpack_require__("../../../../../src/app/material/snackbar/snackbar.component.scss")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__angular_material__["p" /* MdSnackBar */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_material__["p" /* MdSnackBar */]) === "function" && _a || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__angular_material__["q" /* MdSnackBar */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_material__["q" /* MdSnackBar */]) === "function" && _a || Object])
 ], SnackbarComponent);
 
 var _a;

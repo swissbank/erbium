@@ -235,3 +235,19 @@ tr:nth-child(even){background-color: #f2f2f2}
         }
     }
 }
+
+.inputPlaceHolder::-webkit-input-placeholder {
+    font-weight: bold;
+}
+.inputPlaceHolder::-moz-placeholder {
+    font-weight: bold;
+}
+.inputPlaceHolder:-ms-input-placeholder {
+    font-weight: bold;
+} 
+.inputPlaceHolder:-o-input-placeholder {
+    font-weight: bold;
+} 
+.placeHolderBold {
+    font-weight: bold;
+}

@@ -144,7 +144,7 @@ WidgetsModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["h" /* MdIconModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["d" /* MdCardModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["c" /* MdButtonModule */],
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["j" /* MdListModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["k" /* MdListModule */],
             __WEBPACK_IMPORTED_MODULE_6_ng2_charts_ng2_charts__["ChartsModule"],
             __WEBPACK_IMPORTED_MODULE_4__angular_flex_layout__["a" /* FlexLayoutModule */],
             __WEBPACK_IMPORTED_MODULE_5_angular2_google_maps_core__["AgmCoreModule"].forRoot({ apiKey: 'AIzaSyB3HQ_Gk_XRt6KitPdiHQNGpVn0NDwQGMI' })

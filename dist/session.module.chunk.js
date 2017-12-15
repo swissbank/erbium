@@ -346,7 +346,7 @@ SessionModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_1__angular_router__["c" /* RouterModule */].forChild(__WEBPACK_IMPORTED_MODULE_6__session_routing__["a" /* SessionRoutes */]),
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["h" /* MdIconModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["d" /* MdCardModule */],
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["i" /* MdInputModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["j" /* MdInputModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["e" /* MdCheckboxModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["c" /* MdButtonModule */],
             __WEBPACK_IMPORTED_MODULE_5__angular_flex_layout__["a" /* FlexLayoutModule */],

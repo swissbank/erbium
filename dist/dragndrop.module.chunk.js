@@ -133,7 +133,7 @@ DragndropModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["h" /* MdIconModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["d" /* MdCardModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["e" /* MdCheckboxModule */],
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["j" /* MdListModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["k" /* MdListModule */],
             __WEBPACK_IMPORTED_MODULE_4__angular_flex_layout__["a" /* FlexLayoutModule */],
             __WEBPACK_IMPORTED_MODULE_5_ng2_dragula_ng2_dragula__["DragulaModule"]
         ],

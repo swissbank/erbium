@@ -239,8 +239,8 @@ MapModule = __decorate([
             __WEBPACK_IMPORTED_MODULE_2__angular_common__["CommonModule"],
             __WEBPACK_IMPORTED_MODULE_1__angular_router__["c" /* RouterModule */].forChild(__WEBPACK_IMPORTED_MODULE_7__maps_routing__["a" /* MapRoutes */]),
             __WEBPACK_IMPORTED_MODULE_3__angular_material__["d" /* MdCardModule */],
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["s" /* MdToolbarModule */],
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["r" /* MdTabsModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["t" /* MdToolbarModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["s" /* MdTabsModule */],
             __WEBPACK_IMPORTED_MODULE_4__angular_forms__["FormsModule"],
             __WEBPACK_IMPORTED_MODULE_5__angular_flex_layout__["a" /* FlexLayoutModule */],
             __WEBPACK_IMPORTED_MODULE_6_angular2_google_maps_core__["AgmCoreModule"].forRoot({ apiKey: 'YOURAPIKEY' })

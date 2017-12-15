@@ -642,6 +642,7 @@ export class LinksComponent implements OnInit {
       this.currentId = id;
       if (typeof row.forklift == 'object' && row.forklift != null) {
         this.newforklift = row['forklift']['id'];
+        this.current_forklift_id =this.newforklift;
         if (row['forklift']['image']) {
           this.images = row['forklift']['image'];
         }
@@ -1201,7 +1202,6 @@ export class LinksComponent implements OnInit {
           this.selectedIndex = 1;
           var id = '';
           this.currentTransport = {};
-          this.current_forklift_id = 0;
           this.newforklift = 0;
           this.images = [];
           this.user = this._localstorage.getObject('user_token');

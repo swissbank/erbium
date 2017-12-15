@@ -1,9 +1,9 @@
 <md-card *ngIf="!edit && user.user.type == 3">
   <md-card-title><b>Neuer Transport </b> </md-card-title>
   <md-card-content>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form [formGroup]="form">
         <md-input-container dividerColor="primary" class="ml-xs mr-xs" style="width: 31%;" *ngFor="let shipment of shipments; let idx = index">
-          <input mdInput  placeholder="Shipment ID {{idx+1}}" [(ngModel)]="shipment.value" [ngModelOptions]="{standalone: true}">
+          <input class="sid" mdInput md-select-on-focus  placeholder="S-ID {{idx+1}}" [(ngModel)]="shipment.value" [ngModelOptions]="{standalone: true}">
         </md-input-container>
 
       <div fxLayout="row" fxLayoutAlign="start center" class="mb-2">
@@ -66,7 +66,7 @@
             </owl-date-time>
       </div>
       <md-card-actions style="margin-top:2%">
-        <button md-raised-button color="primary" class="primary" type="submit" >Speichern</button>
+        <button md-raised-button color="primary" class="primary" type="submit" (click)="onSubmit()" >Speichern</button>
         <button md-raised-button color="accent" (click)="resetForm()">Zurücksetzen</button>
       </md-card-actions>
     </form>
@@ -77,9 +77,9 @@
 <md-card *ngIf="edit && user.user.type == 3">
   <md-card-title><b>Transport bearbeiten </b> </md-card-title>
   <md-card-content>
-    <form [formGroup]="form" (ngSubmit)="onEditSubmit()">
+    <form [formGroup]="form">
         <md-input-container dividerColor="primary" class="ml-xs mr-xs" style="width: 31%;" *ngFor="let shipment of shipments; let idx = index">
-          <input mdInput placeholder="Shipment ID {{idx+1}}" [(ngModel)]="shipment.value" [ngModelOptions]="{standalone: true}">
+          <input mdInput class="sid" placeholder="S-ID {{idx+1}}"  [(ngModel)]="shipment.value" [ngModelOptions]="{standalone: true}">
         </md-input-container>
 
       <div fxLayout="row" fxLayoutAlign="start center" class="mb-2">
@@ -134,7 +134,7 @@
         </md-select>
       </div>
       <md-card-actions style="margin-top:2%">
-        <button md-raised-button color="primary" class="primary" type="submit" >Speichern</button>
+        <button md-raised-button color="primary" class="primary" (click)="onEditSubmit()" >Speichern</button>
         <button md-raised-button color="accent" type="button" (click)="backForm()" >Zurück</button>        
       </md-card-actions>
     </form>

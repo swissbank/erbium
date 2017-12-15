@@ -1,4 +1,4 @@
-import {Component, OnInit, EventEmitter, Input, Output} from '@angular/core';
+import {Component, OnInit, EventEmitter, Input, Output, ViewChild, ElementRef} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
 import {CustomValidators} from 'ng2-validation';
@@ -6,15 +6,22 @@ import {Logger} from "angular2-logger/core";
 import {AppsService} from '../apps.service';
 import {LocalStorage} from '../../libs/localstorage';
 import {SharedService} from '../shared.service';
+import { MdInputDirective } from '@angular/material';
+
 
 @Component({selector: 'app-transport', templateUrl: './transport.component.html', styleUrls: ['./transport.component.scss']})
 export class TransportComponent implements OnInit {
-
+  @ViewChild(MdInputDirective)  input:any;
+  ngAfterViewInit() {
+    setTimeout(() => {
+         this.input.focus();
+   },300);
+  }
   public form : FormGroup;
   public list = [];
   public shipments : any[] = [
     {
-      value: "1"
+      value: ""
     }
   ];
   public user : any;
@@ -758,7 +765,7 @@ export class TransportComponent implements OnInit {
   }
   private _dateTimeLocal : Date;
 
-  constructor(private _fb : FormBuilder, private _router : Router, private _logger : Logger, private _appsService : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService) {
+  constructor(private elRef:ElementRef, private _fb : FormBuilder, private _router : Router, private _logger : Logger, private _appsService : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService) {
     this._dateTimeLocal = new Date();
     this
       ._sharedService
@@ -884,19 +891,18 @@ export class TransportComponent implements OnInit {
 
   addInput() {
     if (this.shipments.length < 10) {
-      this
-        .shipments
-        .push({value: ''});
+      this.shipments.push({value: ''});
+      var self = this;
+      setTimeout(function(){
+        var input = self.elRef.nativeElement.querySelectorAll('.sid');
+        input[input.length-1].focus();
+      }, 300);
     }
   }
 
   onSubmit() {
-    this
-      ._logger
-      .log(this.shipments);
-    this
-      ._logger
-      .log(this.form.value);
+    this._logger.log(this.shipments);
+    this._logger.log(this.form.value);
     if (this.form.valid) {
       let selshipments = [];
       this
@@ -1138,7 +1144,6 @@ export class TransportComponent implements OnInit {
   }
   public backForm(){
     this.edit = false;
-    //this.form.reset();
     this.CreateForm();
   }
 }

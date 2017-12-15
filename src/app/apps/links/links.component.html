@@ -54,15 +54,17 @@
         <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
 
       </div>
+      <!-- Bericht senden  -->
     </ng-template>
   </ngx-datatable-column>
   <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
-      <button md-raised-button color="primary" (click)="open(row)">Bericht senden </button>
+      <button style="text-align:center;height: 31px"><md-icon>pageview</md-icon></button>
+      <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>picture_as_pdf</md-icon></button>
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>
-<div *ngIf="opentabs&& currentTransport.shipment && currentTransport.destination" style="margin-top: 3% ;margin-left:7%">
+<!-- <div *ngIf="opentabs&& currentTransport.shipment && currentTransport.destination" style="margin-top: 3% ;margin-left:7%">
   <div *ngIf="currentTransport.shipment &&currentTransport.destination">
     <div *ngIf="currentTransport.shipment.length <=0" class="capitalizeLetters">
       <b style="font-size: 15px">
@@ -77,8 +79,18 @@
   </div>
   <div>
   </div>
+</div> -->
+<div *ngIf="opentabs && currentTransport.shipment" style="margin-top: 3% ;margin-left:7%">
+  <div *ngIf="currentTransport.shipment">
+    <div *ngIf="currentTransport.shipment.length >0" class="capitalizeLetters">
+      <b style="font-size: 15px">
+        <span> PRÜFUNG </span> <span *ngFor="let sid of currentTransport.shipment; let i = index"> <span *ngIf="sid.shipment_id"> | {{sid.shipment_id}} </span></span></b>
+    </div>
+  </div>
+  <div>
+  </div>
 </div>
-<md-tab-group *ngIf="opentabs" style="margin-top: 3%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups">
+<md-tab-group *ngIf="opentabs" style="margin-top: 1%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups">
   <md-tab label="1. Dokumente" [disabled]="tab1" class="tableWrapper">
     <ngx-datatable ngx-resize-watcher #firstTable class="material  margin2Top" [rows]="documentsQuestions.rows" [columnMode]="'force'"
       [headerHeight]="0" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="documentsQuestions.count"
@@ -134,12 +146,12 @@
             </div>
           </div>
           <div *ngIf="row.question2 && adr" style="display:inline-block">
-            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+            <md-input-container class="ml-xs mr-xs placeHolderBold" style="width: 100%;">
               <input mdInput placeholder="Ausweis Nr.:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_answeis_nr">
             </md-input-container>
           </div>
           <div *ngIf="row.question3 && adr" style="display:inline-block">
-            <md-input-container class="ml-xs mr-xs" style="width: 100%;">
+            <md-input-container class="ml-xs mr-xs placeHolderBold" style="width: 100%;">
               <input mdInput placeholder="Gültig bis:" type="text" [(ngModel)]="adr_schulungsbescheinigung_22_gultig_bis">
             </md-input-container>
           </div>
@@ -276,8 +288,8 @@
           </div>
           <div *ngIf="row.question2">
             {{row.question2}}
-            <md-input-container class="ml-xs mr-xs" style="width:300px;">
-              <input mdInput placeholder="Plombennummer:" type="text" [(ngModel)]="persoenliche_schutzausruestung_43_plomben_nr">
+            <md-input-container class="ml-xs mr-xs placeHolderBold" style="width:300px;">
+              <input mdInput placeholder="Plombennummer:"  type="text" [(ngModel)]="persoenliche_schutzausruestung_43_plomben_nr">
             </md-input-container>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question3  && adr">
@@ -376,8 +388,8 @@
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question10  && adr">
             <div style="width: 65%;display: inline-block;">{{row.question10}}
-              <md-input-container class="ml-xs mr-xs" style="width:300px;">
-                <input mdInput placeholder="Ausweis Nr.:" type="text" [(ngModel)]="pulverloescher_plombiert_441">
+              <md-input-container class="ml-xs mr-xs placeHolderBold" style="width:300px;">
+                <input mdInput placeholder="Ausweis Nr.:"  type="text" [(ngModel)]="pulverloescher_plombiert_441">
               </md-input-container>
             </div>
             <div style="width: 34%;display: inline-block;text-align: right;">
@@ -466,8 +478,8 @@
         <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
           <div style="width:100%">
             <div style="width: 65%;display: inline-block;">{{row.question}}
-              <md-input-container class="ml-xs mr-xs" style="width: 50%;display:inline-block">
-                <input mdInput placeholder="Datum" type="text" [(ngModel)]="ibc_prueffrist_51_date">
+              <md-input-container class="ml-xs mr-xs placeHolderBold" style="width: 50%;display:inline-block">
+                <input mdInput placeholder="Datum"  type="text" [(ngModel)]="ibc_prueffrist_51_date">
               </md-input-container>
             </div>
             <div style="width: 34%;display: inline-block;text-align: right;">

@@ -610,7 +610,7 @@ TablesModule = __decorate([
         imports: [
             __WEBPACK_IMPORTED_MODULE_2__angular_common__["CommonModule"],
             __WEBPACK_IMPORTED_MODULE_1__angular_router__["c" /* RouterModule */].forChild(__WEBPACK_IMPORTED_MODULE_5__tables_routing__["a" /* TablesRoutes */]),
-            __WEBPACK_IMPORTED_MODULE_3__angular_material__["i" /* MdInputModule */],
+            __WEBPACK_IMPORTED_MODULE_3__angular_material__["j" /* MdInputModule */],
             __WEBPACK_IMPORTED_MODULE_4__swimlane_ngx_datatable__["NgxDatatableModule"]
         ],
         declarations: [
