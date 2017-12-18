@@ -42,18 +42,18 @@
         <md-input-container dividerColor="accent" class="ml-xs mr-xs" style="width: 100%;">
           <input mdInput placeholder="Abfahrt" type="text"  [formControl]="form.controls['abfahrt']">
         </md-input-container>
-        <md-select placeholder="Zuweisung" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['rampe']">
+        <md-select placeholder="Zuweisung*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['rampe']">
            <md-option *ngFor="let i of list" [value]="i.id" >{{i.name}}</md-option>
         </md-select>
       </div>
 
       <div fxLayout="row" fxLayoutAlign="start center" class="mb-2">
-        <md-select placeholder="ADR" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['adr']">
+        <md-select placeholder="ADR*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['adr']">
           <md-option value="Nein">Nein</md-option>
           <md-option value="Ja">Ja</md-option>
         </md-select>
 
-        <md-select placeholder="Luftfracht" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['luftfracht']">
+        <md-select placeholder="Luftfracht*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['luftfracht']">
           <md-option value="Nein">Nein</md-option>
           <md-option value="Ja">Ja</md-option>
         </md-select>
@@ -117,18 +117,18 @@
         <md-input-container dividerColor="accent" class="ml-xs mr-xs" style="width: 100%;" >
           <input mdInput placeholder="Abfahrt" type="text"  disabled [formControl]="form.controls['abfahrt']" [(ngModel)]="editTransportObj.abfahrt">
         </md-input-container>
-        <md-select placeholder="Zuweisung" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['rampe']" [(ngModel)]="editTransportObj.rampe">
+        <md-select placeholder="Zuweisung*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['rampe']" [(ngModel)]="editTransportObj.rampe">
            <md-option *ngFor="let i of list" [value]="i.id" >{{i.name}}</md-option>
         </md-select>
       </div>
 
       <div fxLayout="row" fxLayoutAlign="start center" class="mb-2">
-        <md-select placeholder="ADR" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['adr']" [(ngModel)]="editTransportObj.adr">
+        <md-select placeholder="ADR*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['adr']" [(ngModel)]="editTransportObj.adr">
           <md-option value="Nein">Nein</md-option>
           <md-option value="Ja">Ja</md-option>
         </md-select>
 
-        <md-select placeholder="Luftfracht" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['luftfracht']" [(ngModel)]="editTransportObj.luftfracht">
+        <md-select placeholder="Luftfracht*" class="ml-xs mr-xs" style="width: 100%;" [formControl]="form.controls['luftfracht']" [(ngModel)]="editTransportObj.luftfracht">
           <md-option value="Nein">Nein</md-option>
           <md-option value="Ja">Ja</md-option>
         </md-select>

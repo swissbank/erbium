@@ -14,7 +14,9 @@ export class TransportComponent implements OnInit {
   @ViewChild(MdInputDirective)  input:any;
   ngAfterViewInit() {
     setTimeout(() => {
-         this.input.focus();
+      if(this.input){
+        this.input.focus();
+      }
    },300);
   }
   public form : FormGroup;
@@ -828,22 +830,12 @@ export class TransportComponent implements OnInit {
     this.form = this
       ._fb
       .group({
-        fahrzeughalter: [
-          null, Validators.compose([Validators.required])
-        ],
-        lkw_nr: [
-          null, Validators.compose([Validators.required])
-        ],
-        destination: [
-          null, Validators.compose([Validators.required])
-        ],
-        fahrer: [
-          null, Validators.compose([Validators.required])
-        ],
-        container: [null],
-        plomben_nr: [
-          null, Validators.compose([Validators.required])
-        ],
+        fahrzeughalter: [''],
+        lkw_nr: [''],
+        destination: [''],
+        fahrer: [''],
+        container: [''],
+        plomben_nr:[''],
         adr: [
           null, Validators.compose([Validators.required])
         ],
@@ -944,12 +936,15 @@ export class TransportComponent implements OnInit {
             .reset();
             this.CreateForm(); 
         }, err => {
-          this
-            ._logger
-            .error("addTransporter error");
+          this._logger.error("addTransporter error");
           this
             ._logger
             .error(err);
+            let error = '';
+           for(let key in err.message){
+              error += err.message[key][0] +'<br> &nbsp;'; 
+           }
+           alert(error); 
         });
     }
   }
@@ -1105,24 +1100,12 @@ export class TransportComponent implements OnInit {
     this.form = this
       ._fb
       .group({
-        fahrzeughalter: [
-          null, Validators.compose([Validators.required])
-        ],
-        lkw_nr: [
-          null, Validators.compose([Validators.required])
-        ],
-        destination: [
-          null, Validators.compose([Validators.required])
-        ],
-        fahrer: [
-          null, Validators.compose([Validators.required])
-        ],
-        container: [
-          null
-        ],
-        plomben_nr: [
-          null, Validators.compose([Validators.required])
-        ],
+        fahrzeughalter: [''],
+        lkw_nr: [''],
+        destination: [''],
+        fahrer: [''],
+        container: [''],
+        plomben_nr:[''],
         adr: [
           null, Validators.compose([Validators.required])
         ],

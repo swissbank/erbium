@@ -59,7 +59,7 @@
   </ngx-datatable-column>
   <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
-      <button style="text-align:center;height: 31px"><md-icon>pageview</md-icon></button>
+      <button style="text-align:center;height: 31px" (click)="openView(row)"><md-icon>pageview</md-icon></button>
       <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>picture_as_pdf</md-icon></button>
     </ng-template>
   </ngx-datatable-column>

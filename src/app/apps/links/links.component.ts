@@ -8,6 +8,8 @@ import {
   Inject
 } from '@angular/core';
 import * as _ from "lodash";
+import { DomSanitizer } from '@angular/platform-browser';
+
 
 import {NG_VALUE_ACCESSOR, ControlValueAccessor} from '@angular/forms';
 
@@ -29,6 +31,7 @@ export class LinksComponent implements OnInit {
   offset = 0;
   limit = 20;
   dialogRef : MdDialogRef < JazzDialogComponent >;
+  dailogRef : MdDialogRef < PopDialogComponent >
   lastCloseResult : string;
   config : MdDialogConfig = {
     disableClose: false,
@@ -130,9 +133,8 @@ export class LinksComponent implements OnInit {
   public adr = true;
   public prozess : any = 2;
 
-  constructor(public socket : Socket, private _router : Router, private _logger : Logger, private _managementService : ManagementService, public appServie : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService, public dialog : MdDialog) {
-    this
-      ._sharedService
+  constructor(public sanitizer: DomSanitizer, public socket : Socket, private _router : Router, private _logger : Logger, private _managementService : ManagementService, public appServie : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService, public dialog : MdDialog) {
+    this._sharedService
       .caseNumber$
       .subscribe(data => {
         if (data && data['from'] == 'links') {
@@ -144,8 +146,7 @@ export class LinksComponent implements OnInit {
         }
       });
     let self = this;
-    this
-      .socket
+    this.socket
       .on('new-record', function (data) {
         if (data.from == 'add') {
           self.fun(data);
@@ -164,19 +165,16 @@ export class LinksComponent implements OnInit {
 
   public searchTransports() {
     var self = this;
-    this
-      .appServie
+    this.appServie
       .searchTransports("1", this.search)
       .subscribe(data => {
-        console.log(data);
         self.customData['rows'] = data.data.data;
         self.customData.count = data.data.total;
         self.customData.offset = 0;
         self.customData.limit = 20;
       }, err => {
         console.log(err);
-      })
-
+      });
   }
 
   public open(row) {
@@ -200,29 +198,23 @@ export class LinksComponent implements OnInit {
         this.dialogRef = null;
       });
   }
-  public updateFilter(event) {
-    const val = event
-      .target
-      .value
-      .toLowerCase();
 
-    // filter our data
-    const temp = this
-      .temp
-      .filter(function (d) {
-        if (d.shipment) {
-          if (d['shipment']) {
-            for (let i = 0; i < d['shipment'].length; i++) {
-              var valu = d['shipment'][i]['shipment_id'].indexOf(val) !== -1 || !val;
-              return valu;
-            }
-          }
+  public openView(row) {
+    var obj = {
+      data: {
+        row: row
+      }
+    }
+    this.dailogRef = this
+      .dialog
+      .open(PopDialogComponent, obj);
+    this.dailogRef.afterClosed()
+      .subscribe(result => {
+        if (result) {
+          console.log(result);
         }
+        this.dailogRef = null;
       });
-
-    // update the rows
-    this.customData.rows = temp;
-    this.customData.offset = 0;
   }
 
   customData = {
@@ -1241,4 +1233,14 @@ export class JazzDialogComponent {
   constructor(public dialogRef : MdDialogRef < JazzDialogComponent >) {
     this.currentUserEmail = this.dialogRef._containerInstance.dialogConfig.data.currentUserEmail;
   }
+}
+
+
+@Component({selector: 'pop-jazz-dialog', templateUrl: `./transportview.html`})
+export class PopDialogComponent {
+public row;
+constructor(public dialogRef : MdDialogRef < PopDialogComponent >, public sanitizer: DomSanitizer) {
+  this.row = this.dialogRef._containerInstance.dialogConfig.data.row;
+  this.row.url = 'https://erbium.ch/backend/api/transports/pdf/report/'+this.row.id;
+}
 }

@@ -25,16 +25,10 @@ import { DateTimePickerModule } from 'ng-pick-datetime';
 import { ImageUploadModule } from "angular2-image-upload";
 import { NgxResizeWatcherDirective } from '../../app/ngx-resize-watcher.directive';
 
-
-
-
-
-
-
 import { AppsRoutes } from './apps.routing';
 import { TransportComponent } from './transport/transport.component';
 import { SharedModule } from '../shared/shared.module';
-import { LinksComponent , JazzDialogComponent} from './links/links.component';
+import { LinksComponent , JazzDialogComponent, PopDialogComponent} from './links/links.component';
 
 @NgModule({
   imports: [
@@ -45,39 +39,19 @@ import { LinksComponent , JazzDialogComponent} from './links/links.component';
     MaterialModule,
     SignaturePadModule,
     NgxDatatableModule,
-    /*MdToolbarModule,
-    MdIconModule,
-    MdCardModule,
-    MdInputModule,
-    MdButtonModule,
-    MdButtonToggleModule,
-    MdListModule,
-    MdGridListModule,
-    MdMenuModule,
-    MdSidenavModule,
-    MdProgressBarModule,
-    MdTabsModule,
-    MdDialogModule,*/
-    //CalendarModule.forRoot(),
     FormsModule,
     ReactiveFormsModule,
     FlexLayoutModule,
     DateTimePickerModule
-   
-    //ChartsModule
   ],
   declarations: [
     TransportComponent,
     JazzDialogComponent,
+    PopDialogComponent,
     LinksComponent,
     NgxResizeWatcherDirective
-    /*FullcalendarComponent,
-    MailComponent,
-    MediaComponent,
-    ChatComponent,
-    SocialComponent*/
   ],
-  entryComponents: [ JazzDialogComponent ]
+  entryComponents: [ JazzDialogComponent , PopDialogComponent]
 })
 
 export class AppsModule {}
