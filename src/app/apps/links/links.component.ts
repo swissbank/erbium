@@ -22,9 +22,15 @@ import {SharedService} from '../shared.service';
 import {LocalStorage} from '../../libs/localstorage';
 import {MdDialog, MdDialogRef, MdDialogConfig, MD_DIALOG_DATA} from '@angular/material';
 import {Socket} from 'ng-socket-io';
+import { ColdObservable } from 'rxjs/testing/ColdObservable';
+import { ListsComponent } from 'app/material/lists/lists.component';
 
 
-@Component({selector: 'app-links', templateUrl: './links.component.html', styleUrls: ['./links.component.scss']})
+@Component({
+  selector: 'app-links',
+  templateUrl: './links.component.html',
+  styleUrls: ['./links.component.scss']
+})
 export class LinksComponent implements OnInit {
   rows = [];
   temp = [];
@@ -144,6 +150,8 @@ export class LinksComponent implements OnInit {
           console.log("Same Componenets");
         } else if (data && data['from'] == 'edit') {
           this.ngOnInit();
+        } else if(data && data['from'] == 'popup'){
+          this.closeWizards();
         } else {
           this.ngOnInit();
         }
@@ -221,7 +229,7 @@ export class LinksComponent implements OnInit {
       });
   }
 
-  public openViewSig(row) {
+  public openViewSig() {
     var obj = {
       data: {
         row: this.forklift
@@ -756,6 +764,11 @@ export class LinksComponent implements OnInit {
     var image = this.dataURLtoFiles(data, 'signature.png')
     this.postSignatue(image, row);
   }
+
+  onSaveHandler2(data ,row) {
+    var image = this.dataURLtoFiles(data, 'signature.png')
+    this.postSignatue2(image, row);
+  }
   changeTab(event) {
 
     if (event == 'back' && this.selectedIndex > 0) {
@@ -801,6 +814,22 @@ export class LinksComponent implements OnInit {
     this
       .appServie
       .uploadForkliftSignature(formData, this.newforklift)
+      .subscribe(res => {
+        this.signature = true;
+        alert("Signatur hochgeladen");
+      }, err => {
+        this
+          ._logger
+          .error(err);
+      })
+  }
+
+  postSignatue2(inputValue, row) : void {
+    var formData = new FormData();
+    formData.append("signature", inputValue);
+    this
+      .appServie
+      .uploadForkliftSignature(formData, row.id)
       .subscribe(res => {
         this.signature = true;
         alert("Signatur hochgeladen");
@@ -1259,6 +1288,28 @@ export class LinksComponent implements OnInit {
   changeTabPositon (event){
     this.selectedIndex = event.index;
   };
+  public closeWizards(){
+    this.selectedIndex = 0;
+    var id = '';
+    this.adr = true;
+    this.currentTransport = {};
+    this.forklift = {};
+    this.newforklift = 0;
+    this.images = [];
+    this.user = this._localstorage.getObject('user_token');
+    this.currentId = 0;
+    this.current_forklift_id = 0;
+    var self = this;
+    this.restoreVars();
+    this.fetchData(function (data) {
+      self.customData['rows'] = [];
+      self.customData['rows'] = data.data.data;
+      self.customData.count = self.totalCount;
+      self.customData.offset = 0;
+      self.customData.limit = 20;
+    }, 1);
+    this.opentabs = false;
+  }
 }
 
 //Dailog  Componenet
@@ -1300,24 +1351,91 @@ constructor(public dialogRef : MdDialogRef < PopDialogComponent >, public saniti
 <div style="display:inline-block; text-align:right;margin-left: 26%; margin-top: 8%;">
   <b>{{currentDate}}</b>
 </div>
-<button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="listComponent.updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button>
+<button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button>
 </div>
 `})
-export class PopSignatureDialogComponent {
+export class PopSignatureDialogComponent  {
 public row;
 public noFooter : boolean = false;
 public label : string = 'Unterschrift Fahrer';
 public width : number = 300;
 public height : number = 300;
+public signature : any;
+public user :any;
 onClearHandler() {
   console.log('onclear clicked...');
 }
 
 onSaveHandler(data, row) {
-  this.listComponent.onSaveHandler(data, row);
-  console.log(data);
+  this.listComponent.onSaveHandler2(data, row); 
+  this.signature = true;
 }
-constructor(public dialogRef : MdDialogRef < PopSignatureDialogComponent >, public sanitizer: DomSanitizer, public listComponent: LinksComponent) {
+getDate() {
+  var date = new Date(),
+    year = date.getFullYear(),
+    month = (date.getMonth() + 1).toString(),
+    formatedMonth = (month.length === 1)
+      ? ("0" + month)
+      : month,
+    day = date
+      .getDate()
+      .toString(),
+    formatedDay = (day.length === 1)
+      ? ("0" + day)
+      : day,
+    hour = date
+      .getHours()
+      .toString(),
+    formatedHour = (hour.length === 1)
+      ? ("0" + hour)
+      : hour,
+    minute = date
+      .getMinutes()
+      .toString(),
+    formatedMinute = (minute.length === 1)
+      ? ("0" + minute)
+      : minute,
+    second = date
+      .getSeconds()
+      .toString(),
+    formatedSecond = (second.length === 1)
+      ? ("0" + second)
+      : second;
+  return formatedDay + "." + formatedMonth + "." + year + " | " + formatedHour + ':' + formatedMinute + " Uhr";
+}
+
+public updateForkliftTransport(prozess){
+  this.user = this._localstorage.getObject('user_token');
+  var obj = {
+    transport_id: this.row.id,
+    user_id: this.user.user.id
+  }
+  var requirements = ['signature'];
+
+  for (var i = 0; i < requirements.length; i++) {
+    if (this.signature == false) {
+      alert("Bitte prüfen Sie die Punkte vollständig.")
+      return false;
+    }
+  }
+  obj['prozess'] = 5;
+  obj['abfahrt'] = this.getDate();
+  obj['newforklift'] = this.row.id;
+  this
+    .appServie
+    .updateForklist(obj)
+    .subscribe(res => {
+     console.log(res);
+     this._sharedService.publishData({
+      from:'popup'
+    });
+     this.dialogRef.close();
+    }, err => {
+      console.log(err);
+    });
+
+  }
+constructor(public _sharedService : SharedService, public _localstorage:LocalStorage,public appServie:AppsService,public dialogRef : MdDialogRef < PopSignatureDialogComponent >, public sanitizer: DomSanitizer, public listComponent: LinksComponent) {
   this.row = this.dialogRef._containerInstance.dialogConfig.data.row;
 }
 }

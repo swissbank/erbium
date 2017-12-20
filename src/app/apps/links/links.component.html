@@ -21,14 +21,14 @@
   <ngx-datatable-column name="Zuweisung Rampe" prop="rampe"></ngx-datatable-column>
   <ngx-datatable-column name="Prozess">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
-      <div *ngIf="!row['forklift'] || row['forklift'] == null">
+      <div *ngIf="!row['forklift'] || row['forklift'] == null" [ngClass]="'red'">
         Bereit
       </div>
       <div *ngIf="row['forklift']">
-        <div *ngIf="row['forklift']['prozess']">
+        <div *ngIf="row['forklift']['prozess']" [ngClass]="{'green': row['forklift']['prozess'] == 4, 'orange': row['forklift']['prozess'] == 3, 'blue': row['forklift']['prozess'] == 2, 'yellow': row['forklift']['prozess'] == 1, 'red': row['forklift']['prozess'] == 0}">
           {{row['forklift']['prozess']}} von 5
         </div>
-        <div *ngIf="row['forklift']['prozess'] == 0">
+        <div *ngIf="row['forklift']['prozess'] == 0" [ngClass]="'red'">
           Bereit
         </div>
       </div>
@@ -591,14 +591,16 @@
             </td>
           </tr>
         </table>
-        <div style="margin-top: 5%; display: inline-block;margin-bottom: 10px;margin-left:25%;">
-          <signature-pad (onSave)="onSaveHandler($event)" (onClear)="onClearHandler()" [width]="width" [height]="height" [hideFooter]="noFooter"
+        <div style="margin-top: 5%;margin-bottom: 10px;text-align: center;">
+          <button md-raised-button color="primary" style="margin-top: 30px;" (click)="openViewSig()"> Bitte unterschreiben</button>
+          
+          <!-- <signature-pad (onSave)="onSaveHandler($event)" (onClear)="onClearHandler()" [width]="width" [height]="height" [hideFooter]="noFooter"
             [label]="label">
           </signature-pad>
           <div style="display:inline-block; text-align:right;margin-left: 26%; margin-top: 8%;">
             <b>{{currentDate}}</b>
-          </div>
-          <button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button>
+          </div> -->
+          <!-- <button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button> -->
         </div>
       </md-card-content>
     </md-card>

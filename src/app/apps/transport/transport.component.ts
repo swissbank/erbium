@@ -775,6 +775,8 @@ export class TransportComponent implements OnInit {
       .subscribe(data => {
         if (data && data['from'] == 'transport') {
           console.log("Same Componenets");
+        } else if(data && data['from'] == 'popup'){
+            console.log(data," come from popup nothing to do");
         } else {
           console.log('links send to transport', data);
           if (data['forklift']) {

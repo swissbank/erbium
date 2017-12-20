@@ -15,3 +15,35 @@ app-links{
     }
    
 }
+.datatable-body-cell {
+    /deep/ .green {
+        text-align: center;
+        background-color : #4caf50 !important;
+        color:white !important;
+        border-radius: 3px;
+    }
+    /deep/ .blue {
+        text-align: center;
+        background-color : #448aff !important;
+        color:white !important;
+        border-radius: 3px;
+    }
+    /deep/ .red {
+        text-align: center;
+        background-color : #d32f2f !important;
+        color:white !important;
+        border-radius: 3px;
+    }
+    /deep/ .yellow {
+        text-align: center;
+        background-color : #ffc107 !important;
+        color:black !important;
+        border-radius: 3px;
+    }
+    /deep/ .orange {
+        text-align: center;
+        background-color : #ff9800 !important;
+        color:white !important;
+        border-radius: 3px;
+    }
+}
