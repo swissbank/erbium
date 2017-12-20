@@ -23,6 +23,7 @@ import {LocalStorage} from '../../libs/localstorage';
 import {MdDialog, MdDialogRef, MdDialogConfig, MD_DIALOG_DATA} from '@angular/material';
 import {Socket} from 'ng-socket-io';
 
+
 @Component({selector: 'app-links', templateUrl: './links.component.html', styleUrls: ['./links.component.scss']})
 export class LinksComponent implements OnInit {
   rows = [];
@@ -31,7 +32,8 @@ export class LinksComponent implements OnInit {
   offset = 0;
   limit = 20;
   dialogRef : MdDialogRef < JazzDialogComponent >;
-  dailogRef : MdDialogRef < PopDialogComponent >
+  dailogRef :  MdDialogRef < PopDialogComponent >;
+  dailogSig :  MdDialogRef < PopSignatureDialogComponent >;
   lastCloseResult : string;
   config : MdDialogConfig = {
     disableClose: false,
@@ -45,6 +47,7 @@ export class LinksComponent implements OnInit {
     }
   };
   public next_page_url;
+  public forklift :any;
   public last_page_url;
   public totalCount;
   public current_page;
@@ -205,6 +208,7 @@ export class LinksComponent implements OnInit {
         row: row
       }
     }
+    console.log(this.newforklift);
     this.dailogRef = this
       .dialog
       .open(PopDialogComponent, obj);
@@ -216,6 +220,27 @@ export class LinksComponent implements OnInit {
         this.dailogRef = null;
       });
   }
+
+  public openViewSig(row) {
+    var obj = {
+      data: {
+        row: this.forklift
+      }
+    }
+    if(this.currentTransport.forklift){
+      this.newforklift = this.currentTransport.forklift;
+    }
+    this.dailogRef = this
+      .dialog
+      .open(PopSignatureDialogComponent, obj);
+    this.dailogRef.afterClosed()
+      .subscribe(result => {
+        if (result) {
+          console.log(result);
+        }
+        this.dailogRef = null;
+      });
+  };
 
   customData = {
     rows: [
@@ -593,6 +618,9 @@ export class LinksComponent implements OnInit {
   }
   openTabs(id, event, forklift_id, row) {
     if (row) {
+      if(row['forklift'] && typeof row['forklift'] == 'object'){
+        this.forklift = row['forklift'];
+      }
       if (row.adr == 'Ja') {}
       if (row.adr == 'Nein') {
         this.adr = false;
@@ -635,6 +663,7 @@ export class LinksComponent implements OnInit {
       if (typeof row.forklift == 'object' && row.forklift != null) {
         this.newforklift = row['forklift']['id'];
         this.current_forklift_id =this.newforklift;
+        this.currentTransport = row;
         if (row['forklift']['image']) {
           this.images = row['forklift']['image'];
         }
@@ -667,7 +696,9 @@ export class LinksComponent implements OnInit {
           this.customData['rows'][i]['forklift'] = this.user.user.id;
         }
       }
-
+      if(row['forklift'] && typeof row['forklift'] == 'object'){
+        this.forklift = row['forklift'];
+      }
       return;
     }
     var obj = {
@@ -689,6 +720,7 @@ export class LinksComponent implements OnInit {
           ];
         }
         if ((typeof res.data['forklift']) == 'object' && res.data['forklift'] != null) {
+          this.forklift = res.data['forklift'];
           this.newforklift = res.data['forklift']['id'];
         }
         this.opentabs = true;
@@ -720,11 +752,12 @@ export class LinksComponent implements OnInit {
     // this.opentabs = false;
   }
 
-  onSaveHandler(data) {
+  onSaveHandler(data ,row) {
     var image = this.dataURLtoFiles(data, 'signature.png')
-    this.postSignatue(image);
+    this.postSignatue(image, row);
   }
   changeTab(event) {
+
     if (event == 'back' && this.selectedIndex > 0) {
       this.selectedIndex = this.selectedIndex - 1;
     }
@@ -732,6 +765,8 @@ export class LinksComponent implements OnInit {
       console.log(this.selectedObject);
       this.selectedIndex = this.selectedIndex + 1;
     }
+    var ele4 = document.getElementsByClassName('mat-sidenav-content');
+    ele4[0].scrollTop = 0;
     this.currentDate = this.getDate();
   }
   currentDate = this.getDate();
@@ -760,7 +795,7 @@ export class LinksComponent implements OnInit {
       })
   }
 
-  postSignatue(inputValue) : void {
+  postSignatue(inputValue, row) : void {
     var formData = new FormData();
     formData.append("signature", inputValue);
     this
@@ -880,7 +915,11 @@ export class LinksComponent implements OnInit {
     console.log(row);
   }
 
-  updateForkliftTransport(process) {
+  public updateForkliftTransport(process) {
+    this.user = this
+      ._localstorage
+      .getObject('user_token');
+  
     if (process == 1) {
       var obj = {
         transport_id: this.currentTransport.id,
@@ -919,6 +958,7 @@ export class LinksComponent implements OnInit {
           if (res['data']) {
             if (res['data']['id']) {
               this.current_forklift_id = res['data']['id'];
+              this.forklift = res['data'];
             } else {
               if (this.currentTransport['forklift']) {
                 id = this.currentTransport['forklift']['id'];
@@ -937,7 +977,6 @@ export class LinksComponent implements OnInit {
           }
           this.tab2 = false;
           this.changeTab('next');
-
         }, err => {
           this
             ._logger
@@ -982,6 +1021,7 @@ export class LinksComponent implements OnInit {
           console.log(res);
           var id = '';
           if (res['data']) {
+            this.forklift = res['data'];
             if (res['data']['id']) {
               this.current_forklift_id = res['data']['id'];
             } else {
@@ -1002,7 +1042,6 @@ export class LinksComponent implements OnInit {
           }
           this.tab3 = false;
           this.changeTab('next');
-
         }, err => {
           this
             ._logger
@@ -1062,6 +1101,7 @@ export class LinksComponent implements OnInit {
           console.log(res);
           var id = '';
           if (res['data']) {
+            this.forklift = res['data'];
             if (res['data']['id']) {
               this.current_forklift_id = res['data']['id'];
             } else {
@@ -1119,6 +1159,7 @@ export class LinksComponent implements OnInit {
           console.log(res);
           var id = '';
           if (res['data']) {
+            this.forklift = res['data'];
             if (res['data']['id']) {
               this.current_forklift_id = res['data']['id'];
             } else {
@@ -1139,7 +1180,6 @@ export class LinksComponent implements OnInit {
           }
           this.tab5 = false;
           this.changeTab('next');
-
         }, err => {
           this
             ._logger
@@ -1194,6 +1234,7 @@ export class LinksComponent implements OnInit {
           this.selectedIndex = 1;
           var id = '';
           this.currentTransport = {};
+          this.forklift = {};
           this.newforklift = 0;
           this.images = [];
           this.user = this._localstorage.getObject('user_token');
@@ -1215,7 +1256,9 @@ export class LinksComponent implements OnInit {
         });
     }
   }
-
+  changeTabPositon (event){
+    this.selectedIndex = event.index;
+  };
 }
 
 //Dailog  Componenet
@@ -1242,5 +1285,39 @@ public row;
 constructor(public dialogRef : MdDialogRef < PopDialogComponent >, public sanitizer: DomSanitizer) {
   this.row = this.dialogRef._containerInstance.dialogConfig.data.row;
   this.row.url = 'https://erbium.ch/backend/api/transports/pdf/report/'+this.row.id;
+}
+}
+
+
+@Component({
+  providers:[LinksComponent],
+  selector: 'pop-sig-dialog',
+  template: `
+<div style="margin-top: 5%; display: inline-block;margin-bottom: 10px;">
+<signature-pad (onSave)="onSaveHandler($event, row)" (onClear)="onClearHandler()" [width]="width" [height]="listComponent.height" [hideFooter]="listComponent.noFooter"
+  [label]="label">
+</signature-pad>
+<div style="display:inline-block; text-align:right;margin-left: 26%; margin-top: 8%;">
+  <b>{{currentDate}}</b>
+</div>
+<button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="listComponent.updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button>
+</div>
+`})
+export class PopSignatureDialogComponent {
+public row;
+public noFooter : boolean = false;
+public label : string = 'Unterschrift Fahrer';
+public width : number = 300;
+public height : number = 300;
+onClearHandler() {
+  console.log('onclear clicked...');
+}
+
+onSaveHandler(data, row) {
+  this.listComponent.onSaveHandler(data, row);
+  console.log(data);
+}
+constructor(public dialogRef : MdDialogRef < PopSignatureDialogComponent >, public sanitizer: DomSanitizer, public listComponent: LinksComponent) {
+  this.row = this.dialogRef._containerInstance.dialogConfig.data.row;
 }
 }

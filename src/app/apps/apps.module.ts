@@ -28,7 +28,7 @@ import { NgxResizeWatcherDirective } from '../../app/ngx-resize-watcher.directiv
 import { AppsRoutes } from './apps.routing';
 import { TransportComponent } from './transport/transport.component';
 import { SharedModule } from '../shared/shared.module';
-import { LinksComponent , JazzDialogComponent, PopDialogComponent} from './links/links.component';
+import { LinksComponent , JazzDialogComponent, PopDialogComponent ,PopSignatureDialogComponent} from './links/links.component';
 
 @NgModule({
   imports: [
@@ -48,10 +48,11 @@ import { LinksComponent , JazzDialogComponent, PopDialogComponent} from './links
     TransportComponent,
     JazzDialogComponent,
     PopDialogComponent,
+    PopSignatureDialogComponent,
     LinksComponent,
     NgxResizeWatcherDirective
   ],
-  entryComponents: [ JazzDialogComponent , PopDialogComponent]
+  entryComponents: [ JazzDialogComponent , PopDialogComponent, PopSignatureDialogComponent]
 })
 
 export class AppsModule {}

@@ -43,14 +43,14 @@
         <div *ngIf="row['forklift']['prozess'] != 5">
           <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
             (click)="sendData(row)">Bearbeiten</button>
-          <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, openTabs)">Starten</button>
+          <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
           <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
         </div>
       </div>
       <div *ngIf="!row['forklift']">
         <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
           (click)="sendData(row)">Bearbeiten</button>
-        <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, openTabs)">Starten</button>
+        <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
         <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
 
       </div>
@@ -59,8 +59,8 @@
   </ngx-datatable-column>
   <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
-      <button style="text-align:center;height: 31px" (click)="openView(row)"><md-icon>pageview</md-icon></button>
-      <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>picture_as_pdf</md-icon></button>
+      <button style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
+      <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>email</md-icon></button>
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>
@@ -90,7 +90,7 @@
   <div>
   </div>
 </div>
-<md-tab-group *ngIf="opentabs" style="margin-top: 1%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups">
+<md-tab-group *ngIf="opentabs" style="margin-top: 1%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups" (selectChange)="changeTabPositon($event)">
   <md-tab label="1. Dokumente" [disabled]="tab1" class="tableWrapper">
     <ngx-datatable ngx-resize-watcher #firstTable class="material  margin2Top" [rows]="documentsQuestions.rows" [columnMode]="'force'"
       [headerHeight]="0" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="documentsQuestions.count"
@@ -468,7 +468,6 @@
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(3)">Weiter</button>
     </div>
   </md-tab>
-
   <md-tab label="4. Verpackung" [disabled]="tab4" *ngIf="adr">
     <ngx-datatable class="material margin2Top" ngx-resize-watcher [rows]="protectionOfPublic.rows" [columnMode]="'force'" [headerHeight]="0"
       [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="protectionOfPublic.count" [offset]="protectionOfPublic.offset"
@@ -565,9 +564,6 @@
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(4)">Weiter</button>
     </div>
   </md-tab>
-
-
-
   <md-tab label="5. Bestätigung" [disabled]="tab5">
     <md-card style="height:100%;">
       <md-card-title>

@@ -14,21 +14,5 @@ export const AppsRoutes: Routes = [{
   children: [{
     path: 'transport',
     component: TransportComponent
-  }
-  /*, {
-    path: 'calendar',
-    component: FullcalendarComponent
-  }, {
-    path: 'messages',
-    component: MailComponent
-  }, {
-    path: 'media',
-    component: MediaComponent
-  }, {
-    path: 'chat',
-    component: ChatComponent
-  }, {
-    path: 'social',
-    component: SocialComponent
-  }*/]
+  }]
 }];
