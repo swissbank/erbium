@@ -47,11 +47,14 @@ md-toolbar {
       display: inline;
       background-image: url(/assets/images/logo.png);
       width: 109px;
-      height: 25px;
+      height: 48px;
       -webkit-background-size: 109px 25px;
-      background-size: 109px 25px;
+      background-size: 109px 48px;
       margin: auto;
     }
+    svg path {
+      fill: #fff;
+     }
     .search-bar {
       .search-form {
         background: rgba(255,255,255,1);

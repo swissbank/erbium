@@ -21,29 +21,52 @@ app-links{
         background-color : #4caf50 !important;
         color:white !important;
         border-radius: 3px;
+        border: none !important;
     }
     /deep/ .blue {
         text-align: center;
         background-color : #448aff !important;
         color:white !important;
         border-radius: 3px;
+        border: none !important;
     }
     /deep/ .red {
         text-align: center;
         background-color : #d32f2f !important;
         color:white !important;
         border-radius: 3px;
+        border: none !important;
     }
     /deep/ .yellow {
         text-align: center;
         background-color : #ffc107 !important;
         color:black !important;
         border-radius: 3px;
+        border: none !important;
     }
     /deep/ .orange {
         text-align: center;
         background-color : #ff9800 !important;
         color:white !important;
         border-radius: 3px;
+        border: none !important;
     }
+    /deep/ .lime {
+        text-align: center;
+        background-color : #8bc34a !important;
+        color:white !important;
+        border-radius: 3px;
+        border: none !important;
+  
+    }
+}
+
+md-toolbar.main-header .logo {
+    display: inline;
+    background-image: url(/assets/images/logo.png);
+    width: 109px;
+    height: 47px;
+    background-size: 109px 46px; 
+    margin: auto auto auto auto;
+    background-repeat: no-repeat;
 }

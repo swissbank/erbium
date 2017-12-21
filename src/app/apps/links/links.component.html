@@ -25,7 +25,7 @@
         Bereit
       </div>
       <div *ngIf="row['forklift']">
-        <div *ngIf="row['forklift']['prozess']" [ngClass]="{'green': row['forklift']['prozess'] == 4, 'orange': row['forklift']['prozess'] == 3, 'blue': row['forklift']['prozess'] == 2, 'yellow': row['forklift']['prozess'] == 1, 'red': row['forklift']['prozess'] == 0}">
+        <div *ngIf="row['forklift']['prozess']" [ngClass]="{'lime': row['forklift']['prozess'] == 4, 'orange': row['forklift']['prozess'] == 3, 'blue': row['forklift']['prozess'] == 2, 'yellow': row['forklift']['prozess'] == 1, 'red': row['forklift']['prozess'] == 0, 'green': row['forklift']['prozess'] == 5}">
           {{row['forklift']['prozess']}} von 5
         </div>
         <div *ngIf="row['forklift']['prozess'] == 0" [ngClass]="'red'">
@@ -37,7 +37,7 @@
   <ngx-datatable-column name="Prüfung" *ngIf="user.user.type != 2 && user.user.type !=1">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
       <div *ngIf="row['forklift']">
-        <div *ngIf="row['forklift']['prozess'] == 5">
+        <div *ngIf="row['forklift']['prozess'] == 5" [ngClass]="'green'">
           <button md-raised-button md-raised-button color="warning">Beendet</button>
         </div>
         <div *ngIf="row['forklift']['prozess'] != 5">
@@ -592,7 +592,7 @@
           </tr>
         </table>
         <div style="margin-top: 5%;margin-bottom: 10px;text-align: center;">
-          <button md-raised-button color="primary" style="margin-top: 30px;" (click)="openViewSig()"> Bitte unterschreiben</button>
+          <button md-raised-button color="primary" style="margin-top: 30px;" (click)="openViewSig()"> Signatur hnizufügen </button>
           
           <!-- <signature-pad (onSave)="onSaveHandler($event)" (onClear)="onClearHandler()" [width]="width" [height]="height" [hideFooter]="noFooter"
             [label]="label">
