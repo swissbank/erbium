@@ -59,7 +59,8 @@
   </ngx-datatable-column>
   <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
     <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
-      <button style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
+      <button disabled *ngIf="!row['forklift'] || row['forklift'] == null" style="text-align:center;height: 31px"><a><md-icon>file_download</md-icon></a></button>
+      <button *ngIf="row['forklift']" style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
       <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>email</md-icon></button>
     </ng-template>
   </ngx-datatable-column>
@@ -593,14 +594,6 @@
         </table>
         <div style="margin-top: 5%;margin-bottom: 10px;text-align: center;">
           <button md-raised-button color="primary" style="margin-top: 30px;" (click)="openViewSig()"> Signatur hnizufügen </button>
-          
-          <!-- <signature-pad (onSave)="onSaveHandler($event)" (onClear)="onClearHandler()" [width]="width" [height]="height" [hideFooter]="noFooter"
-            [label]="label">
-          </signature-pad>
-          <div style="display:inline-block; text-align:right;margin-left: 26%; margin-top: 8%;">
-            <b>{{currentDate}}</b>
-          </div> -->
-          <!-- <button md-raised-button color="primary" style="width: 100%; margin-top: 30px;" (click)="updateForkliftTransport(5)"> Prüfen für diesen Transport abschliessen</button> -->
         </div>
       </md-card-content>
     </md-card>

@@ -790,7 +790,7 @@ export class LinksComponent implements OnInit {
   postFile(inputValue : any) {
     var formData = new FormData();
     formData.append("picture[]", inputValue.files[0]);
-    if (this.images.length >= 3) {
+    if (this.images.length >= 5) {
       alert("Du hast bereits Bilder hochgeladen");
       return false;
     }
