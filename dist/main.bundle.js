@@ -639,6 +639,26 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    AppsService.prototype.deleteTransports = function (formData) {
+        var url = this.remoteUrl + "transports/" + formData['id'];
+        var user_token = this._localstorage.getObject('user_token');
+        var token = user_token.access_token;
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
+        headers.append('Authorization', 'Bearer ' + token);
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({ headers: headers });
+        formData['_method'] = "DELETE";
+        formData['user_id'] = user_token.user.id;
+        return this
+            ._http
+            .delete(url, options)
+            .map(function (res) {
+            var response = res.json();
+            return response;
+        })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
+    };
     return AppsService;
 }());
 AppsService = __decorate([

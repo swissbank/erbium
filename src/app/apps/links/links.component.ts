@@ -72,7 +72,7 @@ export class LinksComponent implements OnInit {
     fahrzeughalter: '',
     destination: ''
   };
-  public width : number = 300;
+  public width : number = 600;
   public height : number = 300;
   public user : any;
   public selectedIndex : number = 0;
@@ -249,7 +249,19 @@ export class LinksComponent implements OnInit {
         this.dailogRef = null;
       });
   };
-
+  public deleteTransports(row){
+    var self = this;
+    this
+      .appServie
+      .deleteTransports(row)
+      .subscribe(res => {
+        self.ngOnInit();
+        alert("Transport erfolgreich gelöscht.");
+      }, err => {
+        alert("Fehler: Transport nicht gelöscht.");
+        console.log(err);
+      });
+  }
   customData = {
     rows: [
       {
@@ -1358,7 +1370,7 @@ export class PopSignatureDialogComponent  {
 public row;
 public noFooter : boolean = false;
 public label : string = 'Unterschrift Fahrer';
-public width : number = 300;
+public width : number = 600;
 public height : number = 300;
 public signature : any;
 public user :any;

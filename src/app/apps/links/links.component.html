@@ -42,45 +42,31 @@
         </div>
         <div *ngIf="row['forklift']['prozess'] != 5">
           <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
-            (click)="sendData(row)">Bearbeiten</button>
+            (click)="sendData(row)" style="width: 116px;">Bearbeiten</button>
+          <button md-raised-button color="warn" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3" style="text-align:center;height: 36px" (click)="deleteTransports(row)" > Zurücksetzen</button>
           <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
           <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
         </div>
       </div>
       <div *ngIf="!row['forklift']">
         <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
-          (click)="sendData(row)">Bearbeiten</button>
+          (click)="sendData(row)" style="width: 116px;">Bearbeiten</button>
         <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
         <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
-
+        
       </div>
       <!-- Bericht senden  -->
     </ng-template>
   </ngx-datatable-column>
-  <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1">
-    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template style="text-align: right">
+  <ngx-datatable-column name="Prüfung" *ngIf="user.user.type ==2 || user.user.type ==1" style="width:17%">
+    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
       <button disabled *ngIf="!row['forklift'] || row['forklift'] == null" style="text-align:center;height: 31px"><a><md-icon>file_download</md-icon></a></button>
       <button *ngIf="row['forklift']" style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
       <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>email</md-icon></button>
+      <button style="text-align:center;height: 31px" (click)="deleteTransports(row)" > <md-icon>delete</md-icon></button>
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>
-<!-- <div *ngIf="opentabs&& currentTransport.shipment && currentTransport.destination" style="margin-top: 3% ;margin-left:7%">
-  <div *ngIf="currentTransport.shipment &&currentTransport.destination">
-    <div *ngIf="currentTransport.shipment.length <=0" class="capitalizeLetters">
-      <b style="font-size: 15px">
-        <span> PRÜFUNG </span> 0 VON {{currentTransport.fahrzeughalter}} / {{currentTransport.fahrer}} NACH {{currentTransport.destination}}
-        </b>
-    </div>
-    <div *ngIf="currentTransport.shipment.length >0" class="capitalizeLetters">
-      <b style="font-size: 15px">
-        <span> PRÜFUNG </span> {{currentTransport.shipment[0]['shipment_id']}} VON {{currentTransport.fahrzeughalter}} / {{currentTransport.fahrer}}
-        NACH {{currentTransport.destination}} </b>
-    </div>
-  </div>
-  <div>
-  </div>
-</div> -->
 <div *ngIf="opentabs && currentTransport.shipment" style="margin-top: 3% ;margin-left:7%">
   <div *ngIf="currentTransport.shipment">
     <div *ngIf="currentTransport.shipment.length >0" class="capitalizeLetters">

@@ -306,4 +306,25 @@ export class AppsService {
         message: 'Server error'
       }));
   }
+
+  public deleteTransports(formData) : Observable < any > {
+    let url = this.remoteUrl + "transports/" + formData['id'];
+    let user_token = this._localstorage.getObject('user_token');
+    let token = user_token.access_token;
+    let headers = new Headers({'Content-Type': 'application/json'}); // ... Set content type to JSON
+    headers.append('Authorization', 'Bearer ' + token);
+    let options = new RequestOptions({headers: headers});
+    formData['_method'] = "DELETE";
+    formData['user_id'] = user_token.user.id;
+    return this
+      ._http
+      .delete(url,options)
+      .map((res : Response) => {
+        let response = res.json();
+        return response;
+      })
+      .catch((error : any) => Observable.throw(error.json() || {
+        message: 'Server error'
+      }));
+  }
 }
