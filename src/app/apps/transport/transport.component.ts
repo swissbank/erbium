@@ -7,6 +7,8 @@ import {AppsService} from '../apps.service';
 import {LocalStorage} from '../../libs/localstorage';
 import {SharedService} from '../shared.service';
 import { MdInputDirective } from '@angular/material';
+import {MdDialog, MdDialogRef, MdDialogConfig, MD_DIALOG_DATA} from '@angular/material';
+
 
 
 @Component({selector: 'app-transport', templateUrl: './transport.component.html', styleUrls: ['./transport.component.scss']})
@@ -26,7 +28,9 @@ export class TransportComponent implements OnInit {
       value: ""
     }
   ];
+  public spinner :Boolean = false;
   public user : any;
+  public dailogRef : MdDialogRef < confirmDialogComponent >;
   public edit = false;
   public editTransportObj : any;
   public countries = [
@@ -761,13 +765,35 @@ export class TransportComponent implements OnInit {
       "code": "ZW"
     }
   ];
+  color = 'primary';
+  mode = 'determinate';
+  value = 50;
   @Input('childData')incomingData : string;
   public handleEvent(childData : any) {
     console.log(childData);
   }
   private _dateTimeLocal : Date;
+  public open() {
+    this.dailogRef = this
+    .dialog
+    .open(confirmDialogComponent);
+    
+    this
+    .dailogRef
+    .afterClosed()
+    .subscribe(result => {
+      if (result) {
+        if(result == true){
+          this.deleteTransports();
+        }else{
+          console.log(result);
+        }
+      } else {
 
-  constructor(private elRef:ElementRef, private _fb : FormBuilder, private _router : Router, private _logger : Logger, private _appsService : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService) {
+      }
+    }); 
+  }
+  constructor(public dialog : MdDialog,private elRef:ElementRef, private _fb : FormBuilder, private _router : Router, private _logger : Logger, private _appsService : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService) {
     this._dateTimeLocal = new Date();
     this
       ._sharedService
@@ -777,7 +803,10 @@ export class TransportComponent implements OnInit {
           console.log("Same Componenets");
         } else if(data && data['from'] == 'popup'){
             console.log(data," come from popup nothing to do");
-        } else {
+        }else if(data && data['from'] == 'delete'){
+          console.log('data',data);
+        } 
+        else {
           console.log('links send to transport', data);
           if (data['forklift']) {
             if (data['forklift']['id']) {
@@ -895,6 +924,7 @@ export class TransportComponent implements OnInit {
   }
 
   onSubmit() {
+    this.spinner = true;
     this._logger.log(this.shipments);
     this._logger.log(this.form.value);
     if (this.form.valid) {
@@ -922,6 +952,7 @@ export class TransportComponent implements OnInit {
         ._appsService
         .addTransporter(this.form.value)
         .subscribe(res => {
+          this.spinner = false;
           this
             ._logger
             .log("addTransporter response");
@@ -943,6 +974,7 @@ export class TransportComponent implements OnInit {
             ._logger
             .error(err);
             let error = '';
+            this.spinner = false;
            for(let key in err.message){
               error += err.message[key][0] +'<br> &nbsp;'; 
            }
@@ -952,6 +984,7 @@ export class TransportComponent implements OnInit {
   }
 
   onEditSubmit() {
+    this.spinner = true;
     this
       ._logger
       .log(this.shipments);
@@ -980,6 +1013,7 @@ export class TransportComponent implements OnInit {
         ._appsService
         .updateTransporter(obj)
         .subscribe(res => {
+          this.spinner = false;
           this
             ._logger
             .log("updateTransporter response");
@@ -997,6 +1031,7 @@ export class TransportComponent implements OnInit {
             this.CreateForm();
           this.edit = false;
         }, err => {
+          this.spinner = false;
           this
             ._logger
             .error("updateTransporter error");
@@ -1012,7 +1047,35 @@ export class TransportComponent implements OnInit {
       .form
       .reset();
   }
+  public deleteTransports(){
+    var self = this;
+    var row = {
+      id:this.editTransportObj.id
+    }
+    this
+      ._appsService
+      .deleteTransports(row)
+      .subscribe(res => {
+        self.ngOnInit();
+        alert("Transport erfolgreich gelöscht.");
+        var obj = {
+          from:'delete'
+        };
+        self.shipments = [{value: ''}];
 
+        self
+        ._sharedService
+        .publishData(obj);
+        self
+        .form
+        .reset();
+        self.CreateForm();
+        self.edit = false;
+      }, err => {
+        alert("Fehler: Transport nicht gelöscht.");
+        console.log(err);
+      });
+  }
   private parseDateToStringWithFormat(date : Date) : string {
     let result: string;
     let dd = date
@@ -1130,5 +1193,23 @@ export class TransportComponent implements OnInit {
   public backForm(){
     this.edit = false;
     this.CreateForm();
+  }
+}
+
+
+@Component({selector: 'app-jazz-dialog', template: `
+  <h5 class="mt-0">Transport löschen</h5>
+  <p style="text-align:center;height: 35px">
+    Soll dieser Transport wirklich gelöscht werden?
+  </p>
+  <div style="text-align: right;">
+     <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(yes)">Ja</button>
+     <button md-raised-button md-raised-button color="warn" (click)="dialogRef.close(no)">Abbrechen</button>  
+  </div>`
+})
+export class confirmDialogComponent {
+  public yes :Boolean = true;
+  public no :Boolean = false;
+  constructor(public dialogRef : MdDialogRef < confirmDialogComponent >) {
   }
 }

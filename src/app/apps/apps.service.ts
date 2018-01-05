@@ -125,6 +125,7 @@ export class AppsService {
       .post(url, formData, options)
       .map((res : Response) => {
         let response = res.json();
+        this.socket.emit('forklift-started',{code:200, message:'transports started', from:'forklift-started', success:true});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {

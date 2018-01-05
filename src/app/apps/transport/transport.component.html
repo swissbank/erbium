@@ -65,7 +65,7 @@
                 </div>
             </owl-date-time>
       </div>
-      <md-card-actions style="margin-top:2%">
+      <md-card-actions style="margin-top: -4%;margin-bottom: 1%;">
         <button md-raised-button color="primary" class="primary" type="submit" (click)="onSubmit()" >Speichern</button>
         <button md-raised-button color="accent" (click)="resetForm()">Zurücksetzen</button>
       </md-card-actions>
@@ -133,12 +133,14 @@
           <md-option value="Ja">Ja</md-option>
         </md-select>
       </div>
-      <md-card-actions style="margin-top:2%">
+      <md-card-actions style="margin-top: -1%;margin-bottom: 1%;">
         <button md-raised-button color="primary" class="primary" (click)="onEditSubmit()" >Speichern</button>
-        <button md-raised-button color="accent" type="button" (click)="backForm()" >Zurück</button>        
+        <button md-raised-button color="accent" type="button" (click)="backForm()" >Zurück</button>
+        <button md-raised-button color="warn" (click)="open()" > Löschen</button>
       </md-card-actions>
     </form>
   </md-card-content>
 </md-card>
 
 <app-links></app-links>
+<div class="loading" *ngIf="spinner" >Loading&#8230;</div>

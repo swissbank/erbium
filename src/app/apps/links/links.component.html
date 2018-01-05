@@ -43,7 +43,7 @@
         <div *ngIf="row['forklift']['prozess'] != 5">
           <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
             (click)="sendData(row)" style="width: 116px;">Bearbeiten</button>
-          <button md-raised-button color="warn" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3" style="text-align:center;height: 36px" (click)="deleteTransports(row)" > Zurücksetzen</button>
+          <!-- <button md-raised-button color="warn" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3" style="text-align:center;height: 36px" (click)="deleteTransports(row)" > Löschen</button> -->
           <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
           <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
         </div>
@@ -63,7 +63,7 @@
       <button disabled *ngIf="!row['forklift'] || row['forklift'] == null" style="text-align:center;height: 31px"><a><md-icon>file_download</md-icon></a></button>
       <button *ngIf="row['forklift']" style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
       <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>email</md-icon></button>
-      <button style="text-align:center;height: 31px" (click)="deleteTransports(row)" > <md-icon>delete</md-icon></button>
+      <!-- <button style="text-align:center;height: 31px" (click)="deleteTransports(row)" > <md-icon>delete</md-icon></button> -->
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>
@@ -146,8 +146,11 @@
       </ngx-datatable-column>
     </ngx-datatable>
     <div class="row height50">
-      <button md-raised-button md-raised-button color="warning" (click)="closeTabs()">Zurück</button>
+      <button md-raised-button md-raised-button color="warning" (click)="closeTabs()" style="margin-right: 10px">Zurück</button>
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(1)">Weiter</button>
+    </div>
+    <div style="height: 57px;margin-top: 8px !important;margin-left: 4px !important">
+        <button md-raised-button md-raised-button color="accent" >Diese Prüfung abbrechen</button>
     </div>
   </md-tab>
 
@@ -242,7 +245,7 @@
       </ngx-datatable-column>
     </ngx-datatable>
     <div class="row height50 ">
-      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')" style="margin-right: 10px">Zurück</button>
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(2)">Weiter</button>
     </div>
   </md-tab>
@@ -451,7 +454,7 @@
       </ngx-datatable-column>
     </ngx-datatable>
     <div class="row height50">
-      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')" style="margin-right: 10px">Zurück</button>
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(3)">Weiter</button>
     </div>
   </md-tab>
@@ -547,7 +550,7 @@
       </md-card-content>
     </md-card>
     <div class="row height50">
-      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')" style="margin-right: 10px">Zurück</button>
       <button md-raised-button md-raised-button color="primary" (click)="updateForkliftTransport(4)">Weiter</button>
     </div>
   </md-tab>
@@ -584,7 +587,7 @@
       </md-card-content>
     </md-card>
     <div class="row height50">
-      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')">Zurück</button>
+      <button md-raised-button md-raised-button color="warning" (click)="changeTab('back')" style="margin-right: 10px">Zurück</button>
     </div>
   </md-tab>
 

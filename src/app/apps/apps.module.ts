@@ -26,7 +26,7 @@ import { ImageUploadModule } from "angular2-image-upload";
 import { NgxResizeWatcherDirective } from '../../app/ngx-resize-watcher.directive';
 
 import { AppsRoutes } from './apps.routing';
-import { TransportComponent } from './transport/transport.component';
+import { TransportComponent , confirmDialogComponent} from './transport/transport.component';
 import { SharedModule } from '../shared/shared.module';
 import { LinksComponent , JazzDialogComponent, PopDialogComponent ,PopSignatureDialogComponent} from './links/links.component';
 
@@ -48,11 +48,12 @@ import { LinksComponent , JazzDialogComponent, PopDialogComponent ,PopSignatureD
     TransportComponent,
     JazzDialogComponent,
     PopDialogComponent,
+    confirmDialogComponent,
     PopSignatureDialogComponent,
     LinksComponent,
     NgxResizeWatcherDirective
   ],
-  entryComponents: [ JazzDialogComponent , PopDialogComponent, PopSignatureDialogComponent]
+  entryComponents: [ JazzDialogComponent , PopDialogComponent, confirmDialogComponent, PopSignatureDialogComponent]
 })
 
 export class AppsModule {}

@@ -167,6 +167,9 @@ export class LinksComponent implements OnInit {
       });
     this.socket.on('prozess', function(data){
       self.fun(data);
+    });
+    this.socket.on('forklift-started', function(data){
+      self.fun(data);
     });  
   }
 

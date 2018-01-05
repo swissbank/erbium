@@ -455,6 +455,7 @@ var AppsService = (function () {
         }); });
     };
     AppsService.prototype.pickAndstart = function (formData) {
+        var _this = this;
         var url = this.remoteUrl + "transports/pick-start/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
@@ -467,6 +468,7 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
+            _this.socket.emit('forklift-started', { code: 200, message: 'transports started', from: 'forklift-started', success: true });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
