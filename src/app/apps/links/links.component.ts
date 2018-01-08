@@ -1325,6 +1325,21 @@ export class LinksComponent implements OnInit {
     }, 1);
     this.opentabs = false;
   }
+
+  public resetTransport(){
+    var obj = {
+      id:this.currentTransport.id
+    };
+    this.appServie.resetTransport(obj)
+    .subscribe(res => {
+      console.log(res);
+      this.opentabs = false;
+      this.adr = true;
+      this.ngOnInit();
+    }, err => {
+      console.log(err);
+    })
+  };
 }
 
 //Dailog  Componenet
@@ -1450,6 +1465,7 @@ public updateForkliftTransport(prozess){
     });
 
   }
+
 constructor(public _sharedService : SharedService, public _localstorage:LocalStorage,public appServie:AppsService,public dialogRef : MdDialogRef < PopSignatureDialogComponent >, public sanitizer: DomSanitizer, public listComponent: LinksComponent) {
   this.row = this.dialogRef._containerInstance.dialogConfig.data.row;
 }

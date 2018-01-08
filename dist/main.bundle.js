@@ -366,6 +366,7 @@ var AppsService = (function () {
         this._logger = _logger;
         this.remoteUrl = "https://erbium.ch/backend/api/";
     }
+    ;
     AppsService.prototype.getAllTransporters = function (page) {
         var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc";
         var user_token = this._localstorage.getObject('user_token');
@@ -382,6 +383,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.searchTransports = function (page, shipement) {
         var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&shipement=" + shipement;
         var user_token = this._localstorage.getObject('user_token');
@@ -399,6 +401,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.getTransporter = function (formData) {
         var url = this.remoteUrl + "transports/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
@@ -415,6 +418,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.addTransporter = function (formData) {
         var url = this.remoteUrl + "transports";
         var user_token = this._localstorage.getObject('user_token');
@@ -434,6 +438,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.updateTransporter = function (formData) {
         var url = this.remoteUrl + "transports/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
@@ -454,6 +459,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.pickAndstart = function (formData) {
         var _this = this;
         var url = this.remoteUrl + "transports/pick-start/" + formData['id'];
@@ -475,6 +481,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.getRamps = function () {
         var url = this.remoteUrl + "rampe";
         var user_token = this._localstorage.getObject('user_token');
@@ -492,6 +499,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.getForkLift = function () {
         var url = this.remoteUrl + "forklifts";
         var user_token = this._localstorage.getObject('user_token');
@@ -509,6 +517,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.updateForklist = function (formData) {
         var _this = this;
         var url = this.remoteUrl + "forklifts/" + formData['newforklift'];
@@ -530,6 +539,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.uploadForkliftImage = function (formData, id) {
         var url = this.remoteUrl + "forklifts/images-update/" + id;
         var user_token = this._localstorage.getObject('user_token');
@@ -549,6 +559,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.uploadForkliftSignature = function (formData, id) {
         var user_token = this._localstorage.getObject('user_token');
         var url = this.remoteUrl + "forklifts/update/signature/" + id;
@@ -568,6 +579,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.getForkLiftId = function (id) {
         var url = this.remoteUrl + "forklifts/" + id;
         var user_token = this._localstorage.getObject('user_token');
@@ -585,6 +597,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.updateRampe = function (formData, transport_id) {
         var user_token = this._localstorage.getObject('user_token');
         var url = this.remoteUrl + "transports/rampe/" + transport_id;
@@ -604,6 +617,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.sendEmail = function (formData, id) {
         var url = this.remoteUrl + "transports/send/report/" + id;
         var user_token = this._localstorage.getObject('user_token');
@@ -623,6 +637,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.deleteImage = function (formData, id) {
         var url = this.remoteUrl + 'forklift/del-images/' + id + '/' + formData.id;
         var user_token = this._localstorage.getObject('user_token');
@@ -641,6 +656,7 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
     AppsService.prototype.deleteTransports = function (formData) {
         var url = this.remoteUrl + "transports/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
@@ -661,6 +677,49 @@ var AppsService = (function () {
             message: 'Server error'
         }); });
     };
+    ;
+    AppsService.prototype.resetTransport = function (formData) {
+        var url = this.remoteUrl + "transports/reset/" + formData['id'];
+        var user_token = this._localstorage.getObject('user_token');
+        var token = user_token.access_token;
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
+        headers.append('Authorization', 'Bearer ' + token);
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({ headers: headers });
+        formData['_method'] = "PUT";
+        formData['user_id'] = user_token.user.id;
+        return this
+            ._http
+            .put(url, { id: formData['id'] }, options)
+            .map(function (res) {
+            var response = res.json();
+            return response;
+        })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
+    };
+    ;
+    AppsService.prototype.statusUpdateTransport = function (formData) {
+        var url = this.remoteUrl + "transports/" + formData['id'];
+        var user_token = this._localstorage.getObject('user_token');
+        var token = user_token.access_token;
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
+        headers.append('Authorization', 'Bearer ' + token);
+        var options = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["RequestOptions"]({ headers: headers });
+        formData['_method'] = "PUT";
+        formData['user_id'] = user_token.user.id;
+        return this
+            ._http
+            .put(url, { id: formData['id'], status: formData['status'] }, options)
+            .map(function (res) {
+            var response = res.json();
+            return response;
+        })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
+    };
+    ;
     return AppsService;
 }());
 AppsService = __decorate([

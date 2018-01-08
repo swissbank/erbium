@@ -17,7 +17,7 @@ import {Socket} from 'ng-socket-io';
 export class AppsService {
   public remoteUrl = "https://erbium.ch/backend/api/";
   constructor(public socket:Socket,private _http : Http, private _localstorage : LocalStorage, private _config : Config, private _logger : Logger) {
-  }
+  };
 
   public getAllTransporters(page : string) : Observable < any > {
     let url = this.remoteUrl + "transports?page=" + page + "&created_at=desc";
@@ -34,7 +34,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public searchTransports(page : string, shipement : string) : Observable < any > {
     let url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&shipement=" + shipement;
@@ -52,7 +52,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public getTransporter(formData : Object) : Observable < any > {
     let url = this.remoteUrl + "transports/" + formData['id'];
@@ -69,7 +69,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public addTransporter(formData : Object) : Observable < any > {
     let url = this.remoteUrl + "transports";
@@ -89,7 +89,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public updateTransporter(formData : Object) : Observable < any > {
     let url = this.remoteUrl + "transports/" + formData['id'];
@@ -110,7 +110,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public pickAndstart(formData : Object) : Observable < any > {
     let url = this.remoteUrl + "transports/pick-start/" + formData['id'];
@@ -131,7 +131,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public getRamps() : Observable < any > {
     let url = this.remoteUrl + "rampe";
@@ -149,7 +149,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public getForkLift() : Observable < any > {
     let url = this.remoteUrl + "forklifts";
@@ -167,7 +167,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public updateForklist(formData) : Observable < any > {
     let url = this.remoteUrl + "forklifts/" + formData['newforklift'];
@@ -188,7 +188,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public uploadForkliftImage(formData, id) : Observable < any > {
     let url = this.remoteUrl + "forklifts/images-update/" + id;
@@ -208,7 +208,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public uploadForkliftSignature(formData : any, id) : Observable < any > {
     let user_token = this._localstorage.getObject('user_token');    
@@ -228,7 +228,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public getForkLiftId(id) : Observable < any > {
     let url = this.remoteUrl + "forklifts/" + id;
@@ -247,7 +247,7 @@ export class AppsService {
         message: 'Server error'
       }));
 
-  }
+  };
 
   public updateRampe(formData, transport_id) {
     let user_token = this._localstorage.getObject('user_token');
@@ -267,7 +267,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public sendEmail(formData, id) : Observable < any > {
     let url = this.remoteUrl + "transports/send/report/" + id;
@@ -287,7 +287,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public deleteImage(formData, id) : Observable < any > {
     let url = this.remoteUrl + 'forklift/del-images/' + id + '/' + formData.id;
@@ -306,7 +306,7 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
 
   public deleteTransports(formData) : Observable < any > {
     let url = this.remoteUrl + "transports/" + formData['id'];
@@ -327,5 +327,47 @@ export class AppsService {
       .catch((error : any) => Observable.throw(error.json() || {
         message: 'Server error'
       }));
-  }
+  };
+
+  public resetTransport (formData) : Observable < any > {
+    let url = this.remoteUrl + "transports/reset/" + formData['id'];
+    let user_token = this._localstorage.getObject('user_token');
+    let token = user_token.access_token;
+    let headers = new Headers({'Content-Type': 'application/json'}); // ... Set content type to JSON
+    headers.append('Authorization', 'Bearer ' + token);
+    let options = new RequestOptions({headers: headers});
+    formData['_method'] = "PUT";
+    formData['user_id'] = user_token.user.id;
+    return this
+      ._http
+      .put(url,{id:formData['id']},options)
+      .map((res : Response) => {
+        let response = res.json();
+        return response;
+      })
+      .catch((error : any) => Observable.throw(error.json() || {
+        message: 'Server error'
+      }));
+  };
+
+  public statusUpdateTransport (formData) : Observable < any > {
+    let url = this.remoteUrl + "transports/" + formData['id'];
+    let user_token = this._localstorage.getObject('user_token');
+    let token = user_token.access_token;
+    let headers = new Headers({'Content-Type': 'application/json'}); // ... Set content type to JSON
+    headers.append('Authorization', 'Bearer ' + token);
+    let options = new RequestOptions({headers: headers});
+    formData['_method'] = "PUT";
+    formData['user_id'] = user_token.user.id;
+    return this
+      ._http
+      .put(url,{id:formData['id'],status:formData['status']},options)
+      .map((res : Response) => {
+        let response = res.json();
+        return response;
+      })
+      .catch((error : any) => Observable.throw(error.json() || {
+        message: 'Server error'
+      }));
+  };
 }

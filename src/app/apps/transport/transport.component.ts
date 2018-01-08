@@ -1202,7 +1202,7 @@ export class TransportComponent implements OnInit {
   <p style="text-align:center;height: 35px">
     Soll dieser Transport wirklich gelöscht werden?
   </p>
-  <div style="text-align: right;">
+  <div style="text-align: center;">
      <button md-raised-button md-raised-button color="primary" (click)="dialogRef.close(yes)">Ja</button>
      <button md-raised-button md-raised-button color="warn" (click)="dialogRef.close(no)">Abbrechen</button>  
   </div>`
