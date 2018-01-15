@@ -23,18 +23,12 @@
       <md-icon>person</md-icon>
     </button>
     <md-menu #user="mdMenu" x-position="before">
-      <!--<button md-menu-item>
-        <md-icon>settings</md-icon>
-        Settings
+      <button md-menu-item style="font-weight: bold">
+        {{type}}
       </button>
       <button md-menu-item>
-        <md-icon>account_box</md-icon>
-        Profile
-      </button>
-      <button md-menu-item>
-        <md-icon>notifications_off</md-icon>
-        Disable notifications
-      </button>-->
+          {{first_name}} {{last_name}}
+      </button>  
       <button md-menu-item (click)="signout()">
         <md-icon>exit_to_app</md-icon>
         Abmelden

@@ -1,9 +1,15 @@
-<div *ngIf="!opentabs" style="height: 40px; margin-top: 15px; text-align: center">
+<div *ngIf="!opentabs" style="height: 40px; margin-top: 15px;margin-left:20px">
   <md-input-container class="ml-xs mr-xs list-search__wrapper" style="width: 50%;">
     <input mdInput type="text" [(ngModel)]="search" style="padding:2px;width:30%;" placeholder='Suche nach Primary Shipment-ID'
     />
   </md-input-container>
   <button md-raised-button md-raised-button color="primary" (click)="searchTransports()">Suche</button>
+  <md-select  *ngIf="user.user.type ==2 || user.user.type ==1" [(ngModel)]="filterTransport" (change)="changefilterTransport()" class="ml-xs mr-xs" style="width: 20%;margin-left: 150px !important;" placeholder="Filter">
+    <md-option value="1">Bereit</md-option>
+    <md-option value="2">In Bearbeitung</md-option>
+    <md-option value="3">Beendet</md-option>
+    <md-option value="all">Alle</md-option>
+  </md-select>
 </div>
 <ngx-datatable style="margin-top: 3%" ngx-resize-watcher class="material" *ngIf="!opentabs" [rows]="customData.rows" [columnMode]="'force'"
   [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="customData.count" [offset]="customData.offset"
@@ -25,8 +31,13 @@
         Bereit
       </div>
       <div *ngIf="row['forklift']">
-        <div *ngIf="row['forklift']['prozess']" [ngClass]="{'lime': row['forklift']['prozess'] == 4, 'orange': row['forklift']['prozess'] == 3, 'blue': row['forklift']['prozess'] == 2, 'yellow': row['forklift']['prozess'] == 1, 'red': row['forklift']['prozess'] == 0, 'green': row['forklift']['prozess'] == 5}">
-          {{row['forklift']['prozess']}} von 5
+        <div *ngIf="row['forklift']['prozess']" [ngClass]="{'lime': row['forklift']['prozess'] == 4, 'yellow': row['forklift']['prozess'] == 3, 'blue': row['forklift']['prozess'] == 2, 'orange': row['forklift']['prozess'] == 1, 'red': row['forklift']['prozess'] == 0, 'green': row['forklift']['prozess'] == 5}">
+          <div *ngIf="row['forklift']['prozess'] == 5" class="indigo">
+                Beendet
+          </div>
+          <div *ngIf="row['forklift']['prozess'] != 5">
+            {{row['forklift']['prozess']+1}} von 5
+          </div>
         </div>
         <div *ngIf="row['forklift']['prozess'] == 0" [ngClass]="'red'">
           Bereit
@@ -43,7 +54,6 @@
         <div *ngIf="row['forklift']['prozess'] != 5">
           <button md-raised-button color="primary" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3"
             (click)="sendData(row)" style="width: 116px;">Bearbeiten</button>
-          <!-- <button md-raised-button color="warn" *ngIf="(row.forklift_id == 0 || row.forklift_id == user.user.id || row.forklift_id > 0) && user.user.type == 3" style="text-align:center;height: 36px" (click)="deleteTransports(row)" > Löschen</button> -->
           <button md-raised-button color="primary" *ngIf="row.forklift_id == 0 && user.user.id && user.user.type == 4" (click)="openTabs(row.id,'start',row.forklift_id, row)">Starten</button>
           <button md-raised-button *ngIf="row.forklift_id == user.user.id && user.user.type == 4" color="primary" (click)="openTabs(row.id,'edit',row.forklift_id,row)">Bearbeiten</button>
         </div>
@@ -63,7 +73,6 @@
       <button disabled *ngIf="!row['forklift'] || row['forklift'] == null" style="text-align:center;height: 31px"><a><md-icon>file_download</md-icon></a></button>
       <button *ngIf="row['forklift']" style="text-align:center;height: 31px"><a href="https://erbium.ch/backend/api/transports/pdf/report/{{row.id}}" download="transport{{row.id}}.pdf"><md-icon>file_download</md-icon></a></button>
       <button style="text-align:center;height: 31px" (click)="open(row)"> <md-icon>email</md-icon></button>
-      <!-- <button style="text-align:center;height: 31px" (click)="deleteTransports(row)" > <md-icon>delete</md-icon></button> -->
     </ng-template>
   </ngx-datatable-column>
 </ngx-datatable>
@@ -79,7 +88,7 @@
 </div>
 <md-tab-group *ngIf="opentabs" style="margin-top: 1%; height: 100% !important" [selectedIndex]="selectedIndex" id="tabsGroups" (selectChange)="changeTabPositon($event)">
   <md-tab label="1. Dokumente" [disabled]="tab1" class="tableWrapper">
-    <ngx-datatable ngx-resize-watcher #firstTable class="material  margin2Top" [rows]="documentsQuestions.rows" [columnMode]="'force'"
+    <ngx-datatable style="font-weight:bold" ngx-resize-watcher #firstTable class="material  margin2Top" [rows]="documentsQuestions.rows" [columnMode]="'force'"
       [headerHeight]="0" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="documentsQuestions.count"
       [offset]="documentsQuestions.offset" [limit]="documentsQuestions.limit" (page)='onPage($event)'>
       <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
@@ -94,42 +103,71 @@
               <md-select *ngIf="row.sr==1.1" placeholder="Zuweisung" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="updateRamp" (change)="OnchangeRamp()">
                 <md-option *ngFor="let i of list" [value]="i.id">{{i.name}}</md-option>
               </md-select>
-              <md-select *ngIf="row.sr==1.2 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="fahrzeugausweis_21">
+              <md-radio-group *ngIf="row.sr==1.2 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="fahrzeugausweis_21">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==1.2 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;" [(ngModel)]="fahrzeugausweis_21">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==1.3 && adr" [(ngModel)]="adr_schulungsbescheinigung_22" class="ml-xs mr-xs" style="width:30%;"
+              </md-select> -->
+              <!-- <md-select *ngIf="row.sr==1.3 && adr" [(ngModel)]="adr_schulungsbescheinigung_22" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==1.4  && adr" [(ngModel)]="lichtbildausweis_23" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.3 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="adr_schulungsbescheinigung_22">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+
+              <!-- <md-select *ngIf="row.sr==1.4  && adr" [(ngModel)]="lichtbildausweis_23" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==1.5" [(ngModel)]="arbeitsbescheinigung_fahrer_24" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.4 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="lichtbildausweis_23">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==1.5" [(ngModel)]="arbeitsbescheinigung_fahrer_24" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==1.6 && adr" [(ngModel)]="vertrauensabfertigung_25" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.5 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="arbeitsbescheinigung_fahrer_24">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==1.6 && adr" [(ngModel)]="vertrauensabfertigung_25" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==1.7 && adr" [(ngModel)]="orangefarbene_warntafeln_26" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.6 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="vertrauensabfertigung_25">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==1.7 && adr" [(ngModel)]="orangefarbene_warntafeln_26" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr== 1.8 && adr" [(ngModel)]="schriftliche_weisungen_27" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.7 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="orangefarbene_warntafeln_26">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr== 1.8 && adr" [(ngModel)]="schriftliche_weisungen_27" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==1.8 && adr" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" [(ngModel)]="schriftliche_weisungen_27">
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div *ngIf="row.question2 && adr" style="display:inline-block">
@@ -155,7 +193,7 @@
   </md-tab>
 
   <md-tab label="2. Zustand" [disabled]="tab2" *ngIf="adr">
-    <ngx-datatable ngx-resize-watcher #secondTable class="material margin2Top" [rows]="stateControl.rows" [columnMode]="'force'"
+    <ngx-datatable style="font-weight:bold" ngx-resize-watcher #secondTable class="material margin2Top" [rows]="stateControl.rows" [columnMode]="'force'"
       [headerHeight]="0" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="stateControl.count" [offset]="stateControl.offset"
       [limit]="stateControl.limit" (page)='onPage($event)'>
       <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
@@ -168,38 +206,60 @@
                 Prüfen
               </ng-template>
 
-              <md-select *ngIf="row.sr==2.1" [(ngModel)]="bewegungssicherung_31" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select *ngIf="row.sr==2.1" [(ngModel)]="bewegungssicherung_31" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
 
-              <md-select *ngIf="row.sr==2.2" [(ngModel)]="visuelle_ueberpruefung_32" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <md-radio-group *ngIf="row.sr==2.1 && adr" [(ngModel)]="bewegungssicherung_31" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+
+              <!-- <md-select *ngIf="row.sr==2.2" [(ngModel)]="visuelle_ueberpruefung_32" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==2.3" [(ngModel)]="ladungsbruecke_besenrein_33" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+
+              <md-radio-group *ngIf="row.sr==2.2 && adr" [(ngModel)]="visuelle_ueberpruefung_32" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==2.3" [(ngModel)]="ladungsbruecke_besenrein_33" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
-              <md-select *ngIf="row.sr==2.4" [(ngModel)]="ladungssicherungsmittel_34" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==2.3" [(ngModel)]="ladungsbruecke_besenrein_33" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
+              <!-- <md-select *ngIf="row.sr==2.4" [(ngModel)]="ladungssicherungsmittel_34" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group *ngIf="row.sr==2.4" [(ngModel)]="ladungssicherungsmittel_34" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div *ngIf="row.question2">
             <div style="width:100%;margin-top:1%">
               <div style="width: 65%;display: inline-block;">{{row.question2}}</div>
               <div style="width: 34%;display: inline-block;text-align: right;">
-                <md-select [(ngModel)]="ladungssicherungsmittel_34_gurte" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+                <!-- <md-select [(ngModel)]="ladungssicherungsmittel_34_gurte" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                   <md-option value="1">Ja</md-option>
                   <md-option value="2">Nein</md-option>
                   <md-option value="3">N.A</md-option>
-                </md-select>
+                </md-select> -->
+                <md-radio-group  [(ngModel)]="ladungssicherungsmittel_34_gurte" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                  <md-radio-button value="1">Ja</md-radio-button>
+                  <md-radio-button value="2">Nein</md-radio-button>
+                </md-radio-group>
               </div>
             </div>
           </div>
@@ -208,11 +268,16 @@
               <div style="width: 65%;display: inline-block;">{{row.question3}}</div>
               <div style="width: 34%;display: inline-block;text-align: right;">
 
-                <md-select [(ngModel)]="ladungssicherungsmittel_34_spannstangen" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+                <!-- <md-select [(ngModel)]="ladungssicherungsmittel_34_spannstangen" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                   <md-option value="1">Ja</md-option>
                   <md-option value="2">Nein</md-option>
                   <md-option value="3">N.A</md-option>
-                </md-select>
+                </md-select> -->
+
+                <md-radio-group  [(ngModel)]="ladungssicherungsmittel_34_spannstangen" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                  <md-radio-button value="1">Ja</md-radio-button>
+                  <md-radio-button value="2">Nein</md-radio-button>
+                </md-radio-group>
               </div>
             </div>
           </div>
@@ -221,11 +286,16 @@
               <div style="width: 65%;display: inline-block;">{{row.question4}}</div>
               <div style="width: 34%;display: inline-block;text-align: right;">
 
-                <md-select [(ngModel)]="ladungssicherungsmittel_34_antirutschmatten" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+                <!-- <md-select [(ngModel)]="ladungssicherungsmittel_34_antirutschmatten" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                   <md-option value="1">Ja</md-option>
                   <md-option value="2">Nein</md-option>
                   <md-option value="3">N.A</md-option>
-                </md-select>
+                </md-select> -->
+
+                <md-radio-group  [(ngModel)]="ladungssicherungsmittel_34_antirutschmatten" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                  <md-radio-button value="1">Ja</md-radio-button>
+                  <md-radio-button value="2">Nein</md-radio-button>
+                </md-radio-group>
               </div>
             </div>
           </div>
@@ -233,11 +303,15 @@
             <div style="width:100%">
               <div style="width: 65%;display: inline-block;">{{row.question5}}</div>
               <div style="width: 34%;display: inline-block;text-align: right;">
-                <md-select [(ngModel)]="ladungssicherungsmittel_34_leerpaletten" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+                <!-- <md-select [(ngModel)]="ladungssicherungsmittel_34_leerpaletten" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                   <md-option value="1">Ja</md-option>
                   <md-option value="2">Nein</md-option>
                   <md-option value="3">N.A</md-option>
-                </md-select>
+                </md-select> -->
+                <md-radio-group  [(ngModel)]="ladungssicherungsmittel_34_leerpaletten" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                  <md-radio-button value="1">Ja</md-radio-button>
+                  <md-radio-button value="2">Nein</md-radio-button>
+                </md-radio-group>
               </div>
             </div>
           </div>
@@ -250,7 +324,7 @@
     </div>
   </md-tab>
   <md-tab label="3. ADR" [disabled]="tab3">
-    <ngx-datatable class="material  margin2Top" ngx-resize-watcher [rows]="controlOfTransportUnit.rows" [columnMode]="'force'"
+    <ngx-datatable class="material  margin2Top" style="font-weight:bold" ngx-resize-watcher [rows]="controlOfTransportUnit.rows" [columnMode]="'force'"
       [headerHeight]="0" [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="controlOfTransportUnit.count"
       [offset]="controlOfTransportUnit.offset" [limit]="controlOfTransportUnit.limit" (page)='onPage($event)'>
       <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
@@ -263,17 +337,25 @@
                 Prüfen
               </ng-template>
 
-              <md-select *ngIf="row.sr == 3.1" [(ngModel)]="werbefrei_fuer_tierfutter_41" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select *ngIf="row.sr == 3.1" [(ngModel)]="werbefrei_fuer_tierfutter_41" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  *ngIf="row.sr == 3.1" [(ngModel)]="werbefrei_fuer_tierfutter_41" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
 
-              <md-select *ngIf="row.sr == 3.2" [(ngModel)]="lebensmittel_futtermittel_42" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select *ngIf="row.sr == 3.2" [(ngModel)]="lebensmittel_futtermittel_42" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  *ngIf="row.sr == 3.2" [(ngModel)]="lebensmittel_futtermittel_42" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div *ngIf="row.question2">
@@ -289,11 +371,15 @@
                 Prüfen
               </ng-template>
 
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43" *ngIf="adr" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43" *ngIf="adr" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
 
             </div>
           </div>
@@ -303,12 +389,16 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_schutzbrille" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43_schutzbrille" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43_schutzbrille" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question5  && adr">
@@ -318,12 +408,16 @@
                 Prüfen
               </ng-template>
 
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_chem_handschuhe" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43_chem_handschuhe" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43_chem_handschuhe" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question6  && adr">
@@ -333,12 +427,16 @@
                 Prüfen
               </ng-template>
 
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_warnweste" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43_warnweste" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43_warnweste" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question7  && adr">
@@ -347,12 +445,16 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_vollschutzmaske" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43_vollschutzmaske" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43_vollschutzmaske" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
 
           </div>
@@ -362,12 +464,16 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="persoenliche_schutzausruestung_43_augenspuelflasche" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
+              <!-- <md-select [(ngModel)]="persoenliche_schutzausruestung_43_augenspuelflasche" prop="ngModel" class="ml-xs mr-xs" style="width:30%;"
                 placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="persoenliche_schutzausruestung_43_augenspuelflasche" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
 
@@ -386,11 +492,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="pulverloescher_plombiert_441_pruefung" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="pulverloescher_plombiert_441_pruefung" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="pulverloescher_plombiert_441_pruefung" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question11  && adr">
@@ -404,11 +514,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="unterkeil_schaufel_442" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="unterkeil_schaufel_442" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="unterkeil_schaufel_442" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question13  && adr">
@@ -417,11 +531,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="warnzeichen_warndreiecke_443" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="warnzeichen_warndreiecke_443" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="warnzeichen_warndreiecke_443" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question14  && adr">
@@ -430,11 +548,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="auffangbehaelter_444" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="auffangbehaelter_444" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="auffangbehaelter_444" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question15  && adr">
@@ -443,11 +565,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="kanalisationsabdeckung_445" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="kanalisationsabdeckung_445" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="kanalisationsabdeckung_445" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
         </ng-template>
@@ -459,7 +585,7 @@
     </div>
   </md-tab>
   <md-tab label="4. Verpackung" [disabled]="tab4" *ngIf="adr">
-    <ngx-datatable class="material margin2Top" ngx-resize-watcher [rows]="protectionOfPublic.rows" [columnMode]="'force'" [headerHeight]="0"
+    <ngx-datatable class="material margin2Top" style="font-weight:bold" ngx-resize-watcher [rows]="protectionOfPublic.rows" [columnMode]="'force'" [headerHeight]="0"
       [footerHeight]="50" [rowHeight]="'auto'" [externalPaging]="true" [count]="protectionOfPublic.count" [offset]="protectionOfPublic.offset"
       [limit]="protectionOfPublic.limit" (page)='onPage($event)'>
       <ngx-datatable-column maxWidth="60" name="Nr." prop="sr" class="serial-number"></ngx-datatable-column>
@@ -475,11 +601,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="ibc_prueffrist_51" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="ibc_prueffrist_51" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="ibc_prueffrist_51" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div *ngIf="row.question2" style="width:100%">
@@ -489,11 +619,15 @@
                 Prüfen
               </ng-template>
 
-              <md-select [(ngModel)]="unbeschaedigte_verandstuecke_un_cod_52" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="unbeschaedigte_verandstuecke_un_cod_52" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="unbeschaedigte_verandstuecke_un_cod_52" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
           <div style="width:100%;margin-top:1%" *ngIf="row.question3">
@@ -503,11 +637,15 @@
                 Prüfen
               </ng-template>
 
-              <md-select [(ngModel)]="wirksame_ladungssicherung_53" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="wirksame_ladungssicherung_53" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="wirksame_ladungssicherung_53" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
 
             </div>
           </div>
@@ -517,11 +655,15 @@
               <ng-template let-column="column" ngx-datatable-header-template style="text-align: right">
                 Prüfen
               </ng-template>
-              <md-select [(ngModel)]="ladungssicherung_foto_54" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
+              <!-- <md-select [(ngModel)]="ladungssicherung_foto_54" prop="ngModel" class="ml-xs mr-xs" style="width:30%;" placeholder="Prüfen">
                 <md-option value="1">Ja</md-option>
                 <md-option value="2">Nein</md-option>
                 <md-option value="3">N.A</md-option>
-              </md-select>
+              </md-select> -->
+              <md-radio-group  [(ngModel)]="ladungssicherung_foto_54" placeholder="Prüfen" class="ml-xs mr-xs" style="width:30%;color:#3f51b5" >
+                <md-radio-button value="1">Ja</md-radio-button>
+                <md-radio-button value="2">Nein</md-radio-button>
+              </md-radio-group>
             </div>
           </div>
         </ng-template>
@@ -535,7 +677,7 @@
         <div class="row" style="margin-bottom: 5%;">
           <div class="fileUpload" style="text-align: center">
             <span>Bild hinzufügen</span>
-            <input type="file" class="upload" (change)="changeListener($event)" />
+            <input type="file" multiple class="upload" (change)="changeListener($event)" />
           </div>
         </div>
         <div layout="row" layout-margin>

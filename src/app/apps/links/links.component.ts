@@ -93,9 +93,7 @@ export class LinksComponent implements OnInit {
   @Output('childData')outgoingData = new EventEmitter < any > ();
   public sendData(data : any) {
     data.from = 'links'
-    this
-      ._sharedService
-      .publishData(data);
+    this._sharedService.publishData(data);
   }
   public search : any;
   public user_id : any = 1;
@@ -141,10 +139,10 @@ export class LinksComponent implements OnInit {
   public signature : Boolean = false;
   public adr = true;
   public prozess : any = 2;
+  public filterTransport : any ="all";
 
   constructor(public sanitizer: DomSanitizer, public socket : Socket, private _router : Router, private _logger : Logger, private _managementService : ManagementService, public appServie : AppsService, public _localstorage : LocalStorage, public _sharedService : SharedService, public dialog : MdDialog) {
-    this._sharedService
-      .caseNumber$
+    this._sharedService.caseNumber$
       .subscribe(data => {
         if (data && data['from'] == 'links') {
           console.log("Same Componenets");
@@ -157,20 +155,54 @@ export class LinksComponent implements OnInit {
         }
       });
     let self = this;
-    this.socket
-      .on('new-record', function (data) {
+    this.socket.on('new-record', function (data) {
         if (data.from == 'add') {
           self.fun(data);
         } else {
           console.log("Its from list");
         }
-      });
+    });
     this.socket.on('prozess', function(data){
       self.fun(data);
     });
     this.socket.on('forklift-started', function(data){
       self.fun(data);
-    });  
+    });
+    this.socket.on('transport-updated', function(data){
+      for(var i =0;i<self.customData['rows'].length;i++){
+         if(data['data']['id'] == self.customData['rows'][i]['id']){
+          self.customData['rows'][i] = data['data'];
+         }
+      }
+      self.customData['rows'] = [...self.customData['rows']]
+    });
+    this.socket.on('transport-started', function(data){
+      for(var i =0;i<self.customData['rows'].length;i++){
+        if(data['data']['id'] == self.customData['rows'][i]['id']){
+         self.customData['rows'][i] = data['data'];
+        }
+     }
+     self.customData['rows'] = [...self.customData['rows']]
+   
+    });
+    this.socket.on('transport-deleted', function(data){
+      for(var i =0;i<self.customData['rows'].length;i++){
+        if(data['data'] == self.customData['rows'][i]['id']){
+          self.customData['rows'].splice(i, 1);
+          self.customData.count =  self.customData.count-1;
+        }
+     }
+     self.customData['rows'] = [...self.customData['rows']]
+   
+    });
+    this.socket.on('transport-reset', function(data){
+      for(var i =0;i<self.customData['rows'].length;i++){
+        if(data['data']['id'] == self.customData['rows'][i]['id']){
+         self.customData['rows'][i] = data['data'];
+        }
+     }
+     self.customData['rows'] = [...self.customData['rows']]
+    });
   }
 
   public fun(data) {
@@ -190,7 +222,13 @@ export class LinksComponent implements OnInit {
         console.log(err);
       });
   }
-
+  public changefilterTransport(){
+    if(this.filterTransport == 'all'){
+      this.ngOnInit();
+    }else{
+      this.fetchDataFilter(1,this.filterTransport);
+    }
+  }
   public open(row) {
     this.currentUserEmail = this.user.user.email;
     var obj = {
@@ -433,7 +471,7 @@ export class LinksComponent implements OnInit {
         sr: '3.3',
         question: "Persönliche Schutzausrüstung pro Besatzungsmitglied. Entweder: Typengeprüftes, p" +
             "lombiertes Notbesteck mit Inhaltsverzeichnis",
-        question2: "(leicher inhalt wie unten)",
+        question2: "gleicher Inhalt wie unten",
         question3: "1x geschlossene Schutzbrille",
         question4: "1x Paar lange chemikalienbeständige Handschuhe EN374/EN388",
         question5: "1x Warnweste (EN 471) ",
@@ -627,6 +665,22 @@ export class LinksComponent implements OnInit {
           .error(err);
       })
   }
+
+  fetchDataFilter(page, filter) {
+    var self = this;
+    this
+      .appServie
+      .getAllTransportersFilter(page,filter)
+      .subscribe(res => {
+        self.next_page_url = res.data.next_page_url;
+        self.last_page_url = res.data.last_page;
+        self.current_page = res.data.current_page;
+        self.totalCount = res.data.total;
+        self.customData['rows'] = res.data.data;
+        self.customData.count = self.totalCount;
+      }, err => {
+      });
+  }
   sendEmail(row) {
     this
       .appServie
@@ -804,7 +858,9 @@ export class LinksComponent implements OnInit {
 
   postFile(inputValue : any) {
     var formData = new FormData();
-    formData.append("picture[]", inputValue.files[0]);
+    for (var i=0;i<inputValue.files.length;i++){
+      formData.append("picture[]", inputValue.files[i]);
+    }
     if (this.images.length >= 5) {
       alert("Du hast bereits Bilder hochgeladen");
       return false;
@@ -1085,6 +1141,7 @@ export class LinksComponent implements OnInit {
             }
           }
           this.tab3 = false;
+
           this.changeTab('next');
         }, err => {
           this

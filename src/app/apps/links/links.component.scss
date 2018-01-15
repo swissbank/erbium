@@ -103,9 +103,6 @@
     margin-top: 20px;
     text-align: center;
 }
-// table, th, td {
-//    border: 1px solid black;
-// }
 
  md-card{
     margin-top:2% !important;
@@ -141,6 +138,11 @@ md-tab-group {
     }
   }
 }
+.mat-tab-label.mat-tab-label-active {
+    background-color: #3f51b5;
+    font-weight: bold
+}
+
 .datatable-header-cell-wrapper span.datatable-header-cell-label.draggable{
      font-weight: bold !important;
 }

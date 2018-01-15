@@ -26,9 +26,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   showSettings = false;
   dark: boolean;
   boxed: boolean;
+  type:string;
+  first_name:string;
+  last_name:string;
   collapseSidebar: boolean;
   compactSidebar: boolean;
   currentLang = 'en';
+  user:any;
   root = 'ltr';
   public newRecords =0;;
 
@@ -53,7 +57,25 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
+    if(this._localstorage.getObject('user_token')){
+      this.user = this._localstorage.getObject('user_token').user;
+      this.first_name = this.user.first_name;
+      this.last_name = this.user.last_name;
+      if(this.user.type == 1 || this.user.type == 2){
+        this.type = 'Administrator';
+      }else if(this.user.type == 3){
+        this.type = 'Transport Officer';
+      }else if(this.user.type == 4){
+        this.type = 'Forklift Driver';
+      }
+      console.log(this.type, this.first_name, this.last_name);
+    }else{
+      this.user = {
+        first_name:'',
+        last_name:'',
+        type:''
+      }
+    }
     // Update sidebar menu based on user permission
     this.implementACl();
 

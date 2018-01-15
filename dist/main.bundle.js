@@ -384,6 +384,23 @@ var AppsService = (function () {
         }); });
     };
     ;
+    AppsService.prototype.getAllTransportersFilter = function (page, filter) {
+        var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&status=" + filter;
+        var user_token = this._localstorage.getObject('user_token');
+        var token = user_token.access_token;
+        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
+        headers.append('Authorization', 'Bearer ' + token);
+        return this._http
+            .get(url, { headers: headers })
+            .map(function (res) {
+            var response = res.json();
+            return response;
+        })
+            .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
+            message: 'Server error'
+        }); });
+    };
+    ;
     AppsService.prototype.searchTransports = function (page, shipement) {
         var url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&shipement=" + shipement;
         var user_token = this._localstorage.getObject('user_token');
@@ -420,6 +437,7 @@ var AppsService = (function () {
     };
     ;
     AppsService.prototype.addTransporter = function (formData) {
+        var _this = this;
         var url = this.remoteUrl + "transports";
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
@@ -432,6 +450,10 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
+            _this.statusUpdateTransport({ id: response.data.id, status: "1" }).subscribe(function (data) {
+                console.log(data);
+            });
+            _this.socket.emit('transport-added', { code: 200, data: response.data, from: 'transport-added' });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -440,6 +462,7 @@ var AppsService = (function () {
     };
     ;
     AppsService.prototype.updateTransporter = function (formData) {
+        var _this = this;
         var url = this.remoteUrl + "transports/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
@@ -453,6 +476,7 @@ var AppsService = (function () {
             .put(url, formData, options)
             .map(function (res) {
             var response = res.json();
+            _this.socket.emit('transport-updated', { code: 200, data: response.data, from: 'transport-updated' });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -474,7 +498,10 @@ var AppsService = (function () {
             .post(url, formData, options)
             .map(function (res) {
             var response = res.json();
-            _this.socket.emit('forklift-started', { code: 200, message: 'transports started', from: 'forklift-started', success: true });
+            _this.statusUpdateTransport({ id: formData['id'], status: "2" }).subscribe(function (data) {
+                console.log(data);
+            });
+            _this.socket.emit('transport-started', { code: 200, message: 'transports started', from: 'transport-started', success: true, data: response.data });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -532,6 +559,11 @@ var AppsService = (function () {
             .put(url, formData, options)
             .map(function (res) {
             var response = res.json();
+            if (formData.prozess == 5) {
+                _this.statusUpdateTransport({ id: formData['transport_id'], status: "3" }).subscribe(function (data) {
+                    console.log(data);
+                });
+            }
             _this.socket.emit('prozess', response);
             return response;
         })
@@ -658,6 +690,7 @@ var AppsService = (function () {
     };
     ;
     AppsService.prototype.deleteTransports = function (formData) {
+        var _this = this;
         var url = this.remoteUrl + "transports/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
@@ -671,6 +704,7 @@ var AppsService = (function () {
             .delete(url, options)
             .map(function (res) {
             var response = res.json();
+            _this.socket.emit('transport-deleted', { code: 200, data: response.data, from: 'transport-deleted' });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -679,6 +713,7 @@ var AppsService = (function () {
     };
     ;
     AppsService.prototype.resetTransport = function (formData) {
+        var _this = this;
         var url = this.remoteUrl + "transports/reset/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
@@ -692,6 +727,10 @@ var AppsService = (function () {
             .put(url, { id: formData['id'] }, options)
             .map(function (res) {
             var response = res.json();
+            _this.statusUpdateTransport({ id: formData['id'], status: "1" }).subscribe(function (data) {
+                console.log(data);
+            });
+            _this.socket.emit('transport-reset', { code: 200, data: response.data, from: 'transport-reset' });
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -700,7 +739,8 @@ var AppsService = (function () {
     };
     ;
     AppsService.prototype.statusUpdateTransport = function (formData) {
-        var url = this.remoteUrl + "transports/" + formData['id'];
+        console.log("Call Status", formData);
+        var url = this.remoteUrl + "transports/update-status/" + formData['id'];
         var user_token = this._localstorage.getObject('user_token');
         var token = user_token.access_token;
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_http__["Headers"]({ 'Content-Type': 'application/json' }); // ... Set content type to JSON
@@ -713,6 +753,7 @@ var AppsService = (function () {
             .put(url, { id: formData['id'], status: formData['status'] }, options)
             .map(function (res) {
             var response = res.json();
+            console.log("Call Status Success", response);
             return response;
         })
             .catch(function (error) { return __WEBPACK_IMPORTED_MODULE_2_rxjs_Observable__["Observable"].throw(error.json() || {
@@ -1175,7 +1216,7 @@ var _a;
 /***/ "../../../../../src/app/layouts/admin/admin-layout.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"app\" #root=\"$implicit\" dir=\"ltr\" [ngClass]=\"{'app-dark': dark, 'boxed': boxed, 'collapsed-sidebar': collapseSidebar, 'compact-sidebar': compactSidebar}\">\n  <md-toolbar class=\"main-header\" color=\"primary\">\n    <button (click)=\"sidemenu.toggle()\" md-icon-button>\n      <md-icon>menu</md-icon>\n    </button>\n    <div class=\"branding\">\n      <div class=\"logo\"></div>\n    </div>\n    <div class=\"search-bar\" fxFlex>\n      <form class=\"search-form\" fxShow=\"false\" fxShow.gt-xs>\n        <md-icon>search</md-icon>\n        <input type=\"text\" placeholder=\"Search\" autofocus=\"true\" disabled />\n      </form>\n    </div>\n    <button appToggleFullscreen md-icon-button>\n      <md-icon>fullscreen</md-icon>\n    </button>\n    <button  md-icon-button class=\"ml-xs overflow-visible\">\n      <md-icon>notifications</md-icon>\n      <span class=\"notification-label\">{{newRecords}}</span>\n    </button>\n    <button [md-menu-trigger-for]=\"user\" md-icon-button class=\"ml-xs\">\n      <md-icon>person</md-icon>\n    </button>\n    <md-menu #user=\"mdMenu\" x-position=\"before\">\n      <!--<button md-menu-item>\n        <md-icon>settings</md-icon>\n        Settings\n      </button>\n      <button md-menu-item>\n        <md-icon>account_box</md-icon>\n        Profile\n      </button>\n      <button md-menu-item>\n        <md-icon>notifications_off</md-icon>\n        Disable notifications\n      </button>-->\n      <button md-menu-item (click)=\"signout()\">\n        <md-icon>exit_to_app</md-icon>\n        Abmelden\n      </button>\n    </md-menu>\n  </md-toolbar>\n\n  <md-sidenav-container class=\"app-inner\">\n    <md-sidenav #sidemenu class=\"sidebar-panel\" id=\"sidebar-panel\" [mode]=\"isOver() ? 'over' : 'side'\" [opened]=\"!isOver()\" (mouseover)=\"menuMouseOver()\" (mouseout)=\"menuMouseOut()\">\n      <md-nav-list appAccordion class=\"navigation\">\n        <md-list-item appAccordionLink *ngFor=\"let menuitem of myMenu\" group=\"{{menuitem.state}}\">\n          <a appAccordionToggle class=\"relative\"  md-ripple [routerLink]=\"['/', menuitem.state]\" *ngIf=\"menuitem.type === 'link' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"{{menuitem.state}}\" *ngIf=\"menuitem.type === 'extLink' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"{{menuitem.state}}\" target=\"_blank\" *ngIf=\"menuitem.type === 'extTabLink' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"javascript:;\" *ngIf=\"menuitem.type === 'sub' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n            <md-icon class=\"menu-caret\">arrow_drop_down</md-icon>\n          </a>\n          <md-nav-list class=\"sub-menu\" *ngIf=\"menuitem.type === 'sub' && menuitem.display\">\n            <md-list-item *ngFor=\"let childitem of menuitem.children\" routerLinkActive=\"open\">\n              <a [routerLink]=\"['/', menuitem.state, childitem.state ]\" class=\"relative\" md-ripple>{{ childitem.name | translate }}</a>\n            </md-list-item>\n          </md-nav-list>\n        </md-list-item>\n        <md-divider></md-divider>\n        <!-- <md-list-item>\n          <a (click)=\"addMenuItem()\">\n            <md-icon>add</md-icon>\n            <span>Add</span>\n          </a>\n        </md-list-item> -->\n      </md-nav-list>\n    </md-sidenav>\n    <md-sidenav #end align=\"end\" class=\"chat-panel\" mode=\"over\" opened=\"false\">\n      <md-tab-group [selectedIndex]=\"1\" md-stretch-tabs>\n        <md-tab>\n          <ng-template md-tab-label>Today</ng-template>\n          <div class=\"scroll\">\n            <md-list class=\"pt-1 pb-1\">\n              <md-list-item>\n                <div fxLayout=\"column\">\n                  <h2 class=\"ma-0\">{{ today | date:'EEEE' }}</h2>\n                  <h6 class=\"mat-text-muted ma-0\"><span>{{ today | date:'dd' }}</span>&nbsp;<span>{{ today | date:'MMMM' }}</span></h6>\n                </div>\n              </md-list-item>\n            </md-list>\n            <md-nav-list>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Stocks</h3>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">NASDAQ</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">4,492.87</span>\n                 <span>-0.29%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">NYSE</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">10,692.07</span>\n                 <span>-0.53%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=javascript:;>DOW J</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">17,046.81</span>\n                 <span>-0.14%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">APPL</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">100,89</span>\n                 <span>+0.75%</span>\n              </md-list-item>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Weather</h3>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">{{ today | date:'shortTime' }}</a>\n                 <p md-line class=\"mat-text-muted\">London</p>\n                 <span class=\"h4 pe-is-w-blizzard mr-1\"></span>\n                 <span class=\"h4\">26°</span>\n              </md-list-item>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Todo</h3>\n              <md-list-item>\n                <a md-line href=\"javascript:;\">Learn Angular 2.0</a>\n                <p md-line class=\"mat-text-muted text-md\">2:45PM</p>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">Learn Angular Material</a>\n                 <p md-line class=\"mat-text-muted text-md\">3:20PM</p>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">Write documentation</a>\n                 <p md-line class=\"mat-text-muted text-md\">6:00PM</p>\n              </md-list-item>\n              <md-divider class=\"mt-xs mb-xs\"></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Stats</h3>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Local Storage (4023 / 10690)</p>\n                <md-progress-bar  md-line mode=\"determinate\" color=\"warn\" value=\"40\"></md-progress-bar>\n              </md-list-item>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Cloud Storage (700 / 1030)</p>\n                <md-progress-bar  md-line mode=\"determinate\" color=\"accent\" value=\"70\"></md-progress-bar>\n              </md-list-item>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Local Storage (20 / 100)</p>\n                <md-progress-bar  md-line mode=\"determinate\" value=\"20\"></md-progress-bar>\n              </md-list-item>\n            </md-nav-list>\n          </div>\n        </md-tab>\n        <md-tab>\n          <ng-template md-tab-label>Notifications</ng-template>\n          <div class=\"scroll\">\n            <md-nav-list>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-primary\">people</md-icon>\n                <h4 md-line>Social</h4>\n                <p md-line>Ligula Purus Adipiscing</p>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-warn\">local_offer</md-icon>\n                <h4 md-line>Promotions</h4>\n                <p md-line>Etiam Ligula Dapibus</p>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-accent\">info</md-icon>\n                <h4 md-line>Updates</h4>\n                <p md-line>Sollicitudin Euismod Fringilla</p>\n              </md-list-item>\n\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-indigo\">delete_sweep</md-icon>\n                <h4 md-line>Removed 6 items from task list</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427207139000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>check_circle</md-icon>\n                <h4 md-line>Completed 2 projects</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427412725000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>notifications_paused</md-icon>\n                <h4 md-line>Muted notifications</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427546580000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>person_add</md-icon>\n                <h4 md-line>Added Joel to contact list</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1428275520000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>phone_missed</md-icon>\n                <h4 md-line>Missed live call from Ellie</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1428830580000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>group_add</md-icon>\n                <h4 md-line>You've been added to HR group</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1429363920000 | date: 'fullDate' }}</span>\n              </md-list-item>\n            </md-nav-list>\n          </div>\n        </md-tab>\n      </md-tab-group>\n    </md-sidenav>\n    <router-outlet></router-outlet>\n  </md-sidenav-container>\n\n  <!-- Demo Purposes Only -->\n  <button md-fab color=\"warn\" class=\"mat-fab-bottom-right\" *ngIf=\"showSettingsBtn\" (click)=\"showSettings = true\">\n    <md-icon class=\"md-24\">settings</md-icon>\n  </button>\n  <md-card class=\"settings-panel\" *ngIf=\"showSettingsBtn && showSettings\">\n    <md-toolbar color=\"warn\">\n      <span fxFlex>Options</span>\n      <button md-icon-button (click)=\"showSettings = false\">\n        <md-icon>close</md-icon>\n      </button>\n    </md-toolbar>\n    <md-card-content class=\"demo-checkbox\">\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"collapseSidebar\" (change)=\"compactSidebar = false\" [align]=\"end\">Collapsed Sidebar</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"compactSidebar\" (change)=\"collapseSidebar = false\" [align]=\"end\">Compact Sidebar</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"boxed\" [align]=\"end\">Boxed Layout</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"dark\" [align]=\"end\">Dark Mode</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox (change)=\"root.dir = (root.dir == 'rtl' ? 'ltr' : 'rtl')\" [align]=\"end\">RTL</md-checkbox>\n      </div>\n      <div class=\"pb-0\">\n        <md-select placeholder=\"Language\" class=\"mt-1\" [(ngModel)]=\"currentLang\" #langSelect=\"ngModel\" (ngModelChange)=\"translate.use(currentLang)\">\n          <md-option *ngFor=\"let lang of translate.getLangs()\" [value]=\"lang\">{{ lang }}</md-option>\n        </md-select>\n     </div>\n    </md-card-content>\n  </md-card>\n  <!-- /Demo Purposes Only -->\n\n</div>"
+module.exports = "<div class=\"app\" #root=\"$implicit\" dir=\"ltr\" [ngClass]=\"{'app-dark': dark, 'boxed': boxed, 'collapsed-sidebar': collapseSidebar, 'compact-sidebar': compactSidebar}\">\n  <md-toolbar class=\"main-header\" color=\"primary\">\n    <button (click)=\"sidemenu.toggle()\" md-icon-button>\n      <md-icon>menu</md-icon>\n    </button>\n    <div class=\"branding\">\n      <div class=\"logo\"></div>\n    </div>\n    <div class=\"search-bar\" fxFlex>\n      <form class=\"search-form\" fxShow=\"false\" fxShow.gt-xs>\n        <md-icon>search</md-icon>\n        <input type=\"text\" placeholder=\"Search\" autofocus=\"true\" disabled />\n      </form>\n    </div>\n    <button appToggleFullscreen md-icon-button>\n      <md-icon>fullscreen</md-icon>\n    </button>\n    <button  md-icon-button class=\"ml-xs overflow-visible\">\n      <md-icon>notifications</md-icon>\n      <span class=\"notification-label\">{{newRecords}}</span>\n    </button>\n    <button [md-menu-trigger-for]=\"user\" md-icon-button class=\"ml-xs\">\n      <md-icon>person</md-icon>\n    </button>\n    <md-menu #user=\"mdMenu\" x-position=\"before\">\n      <button md-menu-item style=\"font-weight: bold\">\n        {{type}}\n      </button>\n      <button md-menu-item>\n          {{first_name}} {{last_name}}\n      </button>  \n      <button md-menu-item (click)=\"signout()\">\n        <md-icon>exit_to_app</md-icon>\n        Abmelden\n      </button>\n    </md-menu>\n  </md-toolbar>\n\n  <md-sidenav-container class=\"app-inner\">\n    <md-sidenav #sidemenu class=\"sidebar-panel\" id=\"sidebar-panel\" [mode]=\"isOver() ? 'over' : 'side'\" [opened]=\"!isOver()\" (mouseover)=\"menuMouseOver()\" (mouseout)=\"menuMouseOut()\">\n      <md-nav-list appAccordion class=\"navigation\">\n        <md-list-item appAccordionLink *ngFor=\"let menuitem of myMenu\" group=\"{{menuitem.state}}\">\n          <a appAccordionToggle class=\"relative\"  md-ripple [routerLink]=\"['/', menuitem.state]\" *ngIf=\"menuitem.type === 'link' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"{{menuitem.state}}\" *ngIf=\"menuitem.type === 'extLink' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"{{menuitem.state}}\" target=\"_blank\" *ngIf=\"menuitem.type === 'extTabLink' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n          </a>\n          <a appAccordionToggle class=\"relative\" md-ripple href=\"javascript:;\" *ngIf=\"menuitem.type === 'sub' && menuitem.display\">\n            <md-icon>{{ menuitem.icon }}</md-icon>\n            <span>{{ menuitem.name | translate }}</span>\n            <span fxFlex></span>\n            <span class=\"menu-badge mat-{{ badge.type }}\" *ngFor=\"let badge of menuitem.badge\">{{ badge.value }}</span>\n            <md-icon class=\"menu-caret\">arrow_drop_down</md-icon>\n          </a>\n          <md-nav-list class=\"sub-menu\" *ngIf=\"menuitem.type === 'sub' && menuitem.display\">\n            <md-list-item *ngFor=\"let childitem of menuitem.children\" routerLinkActive=\"open\">\n              <a [routerLink]=\"['/', menuitem.state, childitem.state ]\" class=\"relative\" md-ripple>{{ childitem.name | translate }}</a>\n            </md-list-item>\n          </md-nav-list>\n        </md-list-item>\n        <md-divider></md-divider>\n        <!-- <md-list-item>\n          <a (click)=\"addMenuItem()\">\n            <md-icon>add</md-icon>\n            <span>Add</span>\n          </a>\n        </md-list-item> -->\n      </md-nav-list>\n    </md-sidenav>\n    <md-sidenav #end align=\"end\" class=\"chat-panel\" mode=\"over\" opened=\"false\">\n      <md-tab-group [selectedIndex]=\"1\" md-stretch-tabs>\n        <md-tab>\n          <ng-template md-tab-label>Today</ng-template>\n          <div class=\"scroll\">\n            <md-list class=\"pt-1 pb-1\">\n              <md-list-item>\n                <div fxLayout=\"column\">\n                  <h2 class=\"ma-0\">{{ today | date:'EEEE' }}</h2>\n                  <h6 class=\"mat-text-muted ma-0\"><span>{{ today | date:'dd' }}</span>&nbsp;<span>{{ today | date:'MMMM' }}</span></h6>\n                </div>\n              </md-list-item>\n            </md-list>\n            <md-nav-list>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Stocks</h3>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">NASDAQ</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">4,492.87</span>\n                 <span>-0.29%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">NYSE</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">10,692.07</span>\n                 <span>-0.53%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=javascript:;>DOW J</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">17,046.81</span>\n                 <span>-0.14%</span>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">APPL</a>\n                 <span class=\"mat-text-muted text-md mr-xs ml-xs\">100,89</span>\n                 <span>+0.75%</span>\n              </md-list-item>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Weather</h3>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">{{ today | date:'shortTime' }}</a>\n                 <p md-line class=\"mat-text-muted\">London</p>\n                 <span class=\"h4 pe-is-w-blizzard mr-1\"></span>\n                 <span class=\"h4\">26°</span>\n              </md-list-item>\n              <md-divider></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Todo</h3>\n              <md-list-item>\n                <a md-line href=\"javascript:;\">Learn Angular 2.0</a>\n                <p md-line class=\"mat-text-muted text-md\">2:45PM</p>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">Learn Angular Material</a>\n                 <p md-line class=\"mat-text-muted text-md\">3:20PM</p>\n              </md-list-item>\n              <md-list-item>\n                 <a md-line href=\"javascript:;\">Write documentation</a>\n                 <p md-line class=\"mat-text-muted text-md\">6:00PM</p>\n              </md-list-item>\n              <md-divider class=\"mt-xs mb-xs\"></md-divider>\n              <h3 md-subheader class=\"text-uppercase font-weight-bold\">Stats</h3>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Local Storage (4023 / 10690)</p>\n                <md-progress-bar  md-line mode=\"determinate\" color=\"warn\" value=\"40\"></md-progress-bar>\n              </md-list-item>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Cloud Storage (700 / 1030)</p>\n                <md-progress-bar  md-line mode=\"determinate\" color=\"accent\" value=\"70\"></md-progress-bar>\n              </md-list-item>\n              <md-list-item>\n                <p class=\"text-md\" md-line>Local Storage (20 / 100)</p>\n                <md-progress-bar  md-line mode=\"determinate\" value=\"20\"></md-progress-bar>\n              </md-list-item>\n            </md-nav-list>\n          </div>\n        </md-tab>\n        <md-tab>\n          <ng-template md-tab-label>Notifications</ng-template>\n          <div class=\"scroll\">\n            <md-nav-list>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-primary\">people</md-icon>\n                <h4 md-line>Social</h4>\n                <p md-line>Ligula Purus Adipiscing</p>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-warn\">local_offer</md-icon>\n                <h4 md-line>Promotions</h4>\n                <p md-line>Etiam Ligula Dapibus</p>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-text-accent\">info</md-icon>\n                <h4 md-line>Updates</h4>\n                <p md-line>Sollicitudin Euismod Fringilla</p>\n              </md-list-item>\n\n              <md-list-item>\n                <md-icon md-list-avatar class=\"mat-indigo\">delete_sweep</md-icon>\n                <h4 md-line>Removed 6 items from task list</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427207139000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>check_circle</md-icon>\n                <h4 md-line>Completed 2 projects</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427412725000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>notifications_paused</md-icon>\n                <h4 md-line>Muted notifications</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1427546580000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>person_add</md-icon>\n                <h4 md-line>Added Joel to contact list</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1428275520000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>phone_missed</md-icon>\n                <h4 md-line>Missed live call from Ellie</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1428830580000 | date: 'fullDate' }}</span>\n              </md-list-item>\n              <md-list-item>\n                <md-icon md-list-avatar>group_add</md-icon>\n                <h4 md-line>You've been added to HR group</h4>\n                <span class=\"text-md mat-text-muted\" md-line>{{ 1429363920000 | date: 'fullDate' }}</span>\n              </md-list-item>\n            </md-nav-list>\n          </div>\n        </md-tab>\n      </md-tab-group>\n    </md-sidenav>\n    <router-outlet></router-outlet>\n  </md-sidenav-container>\n\n  <!-- Demo Purposes Only -->\n  <button md-fab color=\"warn\" class=\"mat-fab-bottom-right\" *ngIf=\"showSettingsBtn\" (click)=\"showSettings = true\">\n    <md-icon class=\"md-24\">settings</md-icon>\n  </button>\n  <md-card class=\"settings-panel\" *ngIf=\"showSettingsBtn && showSettings\">\n    <md-toolbar color=\"warn\">\n      <span fxFlex>Options</span>\n      <button md-icon-button (click)=\"showSettings = false\">\n        <md-icon>close</md-icon>\n      </button>\n    </md-toolbar>\n    <md-card-content class=\"demo-checkbox\">\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"collapseSidebar\" (change)=\"compactSidebar = false\" [align]=\"end\">Collapsed Sidebar</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"compactSidebar\" (change)=\"collapseSidebar = false\" [align]=\"end\">Compact Sidebar</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"boxed\" [align]=\"end\">Boxed Layout</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox [(ngModel)]=\"dark\" [align]=\"end\">Dark Mode</md-checkbox>\n      </div>\n      <div class=\"pb-1\">\n        <md-checkbox (change)=\"root.dir = (root.dir == 'rtl' ? 'ltr' : 'rtl')\" [align]=\"end\">RTL</md-checkbox>\n      </div>\n      <div class=\"pb-0\">\n        <md-select placeholder=\"Language\" class=\"mt-1\" [(ngModel)]=\"currentLang\" #langSelect=\"ngModel\" (ngModelChange)=\"translate.use(currentLang)\">\n          <md-option *ngFor=\"let lang of translate.getLangs()\" [value]=\"lang\">{{ lang }}</md-option>\n        </md-select>\n     </div>\n    </md-card-content>\n  </md-card>\n  <!-- /Demo Purposes Only -->\n\n</div>"
 
 /***/ }),
 
@@ -1241,6 +1282,28 @@ var AdminLayoutComponent = (function () {
     ;
     AdminLayoutComponent.prototype.ngOnInit = function () {
         var _this = this;
+        if (this._localstorage.getObject('user_token')) {
+            this.user = this._localstorage.getObject('user_token').user;
+            this.first_name = this.user.first_name;
+            this.last_name = this.user.last_name;
+            if (this.user.type == 1 || this.user.type == 2) {
+                this.type = 'Administrator';
+            }
+            else if (this.user.type == 3) {
+                this.type = 'Transport Officer';
+            }
+            else if (this.user.type == 4) {
+                this.type = 'Forklift Driver';
+            }
+            console.log(this.type, this.first_name, this.last_name);
+        }
+        else {
+            this.user = {
+                first_name: '',
+                last_name: '',
+                type: ''
+            };
+        }
         // Update sidebar menu based on user permission
         this.implementACl();
         var elemSidebar = document.querySelector('.app-inner > .sidebar-panel');

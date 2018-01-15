@@ -36,6 +36,23 @@ export class AppsService {
       }));
   };
 
+  public getAllTransportersFilter(page : string, filter:string) : Observable < any > {
+    let url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&status="+filter;
+    let user_token = this._localstorage.getObject('user_token');
+    let token = user_token.access_token;
+    let headers = new Headers({'Content-Type': 'application/json'}); // ... Set content type to JSON
+    headers.append('Authorization', 'Bearer ' + token);
+    return this._http
+      .get(url, {headers: headers})
+      .map((res : Response) => {
+        let response = res.json();
+        return response;
+      })
+      .catch((error : any) => Observable.throw(error.json() || {
+        message: 'Server error'
+      }));
+  };
+
   public searchTransports(page : string, shipement : string) : Observable < any > {
     let url = this.remoteUrl + "transports?page=" + page + "&created_at=desc&shipement=" + shipement;
     let user_token = this._localstorage.getObject('user_token');
@@ -84,6 +101,10 @@ export class AppsService {
       .post(url, formData, options)
       .map((res : Response) => {
         let response = res.json();
+        this.statusUpdateTransport({id:response.data.id, status:"1"}).subscribe((data)=>{
+          console.log(data);
+        });
+        this.socket.emit('transport-added',{code:200,data:response.data,from:'transport-added'});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {
@@ -105,6 +126,7 @@ export class AppsService {
       .put(url, formData, options)
       .map((res : Response) => {
         let response = res.json();
+        this.socket.emit('transport-updated',{code:200,data:response.data,from:'transport-updated'});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {
@@ -125,7 +147,10 @@ export class AppsService {
       .post(url, formData, options)
       .map((res : Response) => {
         let response = res.json();
-        this.socket.emit('forklift-started',{code:200, message:'transports started', from:'forklift-started', success:true});
+        this.statusUpdateTransport({id:formData['id'], status:"2"}).subscribe((data)=>{
+          console.log(data);
+        });
+        this.socket.emit('transport-started',{code:200, message:'transports started', from:'transport-started', success:true,data:response.data});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {
@@ -182,6 +207,11 @@ export class AppsService {
       .put(url, formData, options)
       .map((res : Response) => {
         let response = res.json();
+        if(formData.prozess == 5){
+          this.statusUpdateTransport({id:formData['transport_id'], status:"3"}).subscribe((data)=>{
+            console.log(data);
+          });
+        }
         this.socket.emit('prozess',response);
         return response;
       })
@@ -322,6 +352,7 @@ export class AppsService {
       .delete(url,options)
       .map((res : Response) => {
         let response = res.json();
+        this.socket.emit('transport-deleted',{code:200,data:response.data,from:'transport-deleted'});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {
@@ -343,6 +374,10 @@ export class AppsService {
       .put(url,{id:formData['id']},options)
       .map((res : Response) => {
         let response = res.json();
+        this.statusUpdateTransport({id:formData['id'], status:"1"}).subscribe((data)=>{
+          console.log(data);
+        });
+        this.socket.emit('transport-reset',{code:200,data:response.data,from:'transport-reset'});
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {
@@ -351,7 +386,8 @@ export class AppsService {
   };
 
   public statusUpdateTransport (formData) : Observable < any > {
-    let url = this.remoteUrl + "transports/" + formData['id'];
+    console.log("Call Status",formData);
+    let url = this.remoteUrl + "transports/update-status/" + formData['id'];
     let user_token = this._localstorage.getObject('user_token');
     let token = user_token.access_token;
     let headers = new Headers({'Content-Type': 'application/json'}); // ... Set content type to JSON
@@ -364,6 +400,7 @@ export class AppsService {
       .put(url,{id:formData['id'],status:formData['status']},options)
       .map((res : Response) => {
         let response = res.json();
+        console.log("Call Status Success",response);
         return response;
       })
       .catch((error : any) => Observable.throw(error.json() || {

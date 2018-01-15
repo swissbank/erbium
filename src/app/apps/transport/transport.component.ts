@@ -924,7 +924,7 @@ export class TransportComponent implements OnInit {
   }
 
   onSubmit() {
-    this.spinner = true;
+   
     this._logger.log(this.shipments);
     this._logger.log(this.form.value);
     if (this.form.valid) {
@@ -944,6 +944,7 @@ export class TransportComponent implements OnInit {
         }
       this.form.value['shipment_id'] = selshipments;
       this.form.value['ankunft']= this.getDate();
+      this.spinner = true;
       this
         ._logger
         .log(this.form.value);
@@ -984,7 +985,7 @@ export class TransportComponent implements OnInit {
   }
 
   onEditSubmit() {
-    this.spinner = true;
+   
     this
       ._logger
       .log(this.shipments);
@@ -1008,7 +1009,7 @@ export class TransportComponent implements OnInit {
       let obj = this.form.value;
       obj.id = this.editTransportObj.id;
       obj['ankunft']= this.editTransportObj['ankunft'];
-
+      this.spinner = true;
       this
         ._appsService
         .updateTransporter(obj)
@@ -1193,6 +1194,9 @@ export class TransportComponent implements OnInit {
   public backForm(){
     this.edit = false;
     this.CreateForm();
+    this.shipments = [{
+      value:''
+    }];
   }
 }
 

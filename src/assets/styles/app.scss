@@ -39,8 +39,8 @@ app-links{
     }
     /deep/ .yellow {
         text-align: center;
-        background-color : #FF9800 !important;
-        color:white !important;
+        background-color :#FFEB3B !important;
+        color:black !important;
         border-radius: 3px;
         border: none !important;
     }
@@ -59,13 +59,24 @@ app-links{
         border: none !important;
   
     }
-}
 
+    /deep/ .indigo {
+        text-align: center;
+        background-color : #3f51b5 !important;
+        color:white !important;
+        border-radius: 3px;
+        border: none !important;
+  
+    }
+}
+.mat-tab-label.mat-tab-label-active {
+    font-weight: bold !important;
+    color: #3f51b5 !important;
+    font-size: 16px !important;
+}
 md-toolbar.main-header .logo {
     display: inline;
     background-image: url(/assets/images/logo.png);
-    width: 109px;
-    height: 47px;
     background-size: 109px 46px; 
     margin: auto auto auto auto;
     background-repeat: no-repeat;
